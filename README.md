@@ -10,8 +10,7 @@ A super simple, fun playground built with **pure HTML + CSS** (no JavaScript!).
 
 ## Try it
 
-Open `index.html` in your browser, or visit the live site:
-https://sworddao.github.io/bounce-party/
+Open `index.html` in your browser to try it.
 
 ## Edit it
 
