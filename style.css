@@ -47,11 +47,17 @@ body {
 }
 
 .ball {
-  position: absolute;
-  bottom: 0;
-  font-size: 3rem;
-  animation: settle 1.8s cubic-bezier(0.25, 0.1, 0.25, 1) forwards;
-  opacity: 0;
+position: absolute;
+bottom: 0;
+font-size: 3rem;
+animation: settle 1.8s cubic-bezier(0.25, 0.1, 0.25, 1) forwards;
+opacity: 0;
+transition: filter 0.3s ease;
+}
+
+.ball:hover {
+filter: drop-shadow(0 0 12px white);
+transform: scale(1.2);
 }
 
 body:has(.switch input:checked) .ball {
@@ -68,8 +74,13 @@ body:has(.switch input:checked) .ball {
 }
 
 @keyframes bounce {
-  0%, 100% { transform: translateY(0); }
-  50%      { transform: translateY(-300px); }
+0%, 100% {
+  transform: translateY(0) scale(1);
+}
+
+50% {
+  transform: translateY(-300px) scale(1.15);
+}
 }
 
 .ball-1 { left: 5%; }
