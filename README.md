@@ -2,9 +2,10 @@
 
 A super simple, fun playground built with **pure HTML + CSS** (no JavaScript!).
 
-- Animated emoji balls bouncing forever
+- Emoji balls resting at the bottom of the stage
+- Flip "Party mode" on: they bounce forever — off: they gracefully fade and settle back down
 - Color-shifting gradient background
-- Confetti that falls when "Party mode" is on (CSS-only checkbox toggle)
+- Confetti that falls while "Party mode" is on (CSS-only checkbox toggle)
 - Works in any browser — just open `index.html`
 
 ## Try it
