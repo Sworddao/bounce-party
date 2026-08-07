@@ -168,7 +168,36 @@ body:has(.switch input:checked) .ball-8 { animation-duration: 1.35s; animation-d
 
 .footer {
   position: fixed;
-  bottom: 12px;
+  bottom: 16px;
+  left: 50%;
+  transform: translateX(-50%);
   font-size: 0.9rem;
-  opacity: 0.8;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  padding: 10px 22px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.18);
+  border: 2px solid rgba(255, 255, 255, 0.45);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.25);
+  background-image: linear-gradient(120deg, #fff, #ffe066, #ff8fab, #a18cd1, #fff);
+  background-size: 250% 250%;
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: footerShimmer 4s ease-in-out infinite;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  white-space: nowrap;
+}
+
+.footer:hover {
+  transform: translateX(-50%) scale(1.06);
+  box-shadow: 0 6px 26px rgba(255, 255, 255, 0.45);
+}
+
+@keyframes footerShimmer {
+  0%   { background-position: 0% 50%; }
+  50%  { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
 }
