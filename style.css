@@ -171,10 +171,10 @@ body:has(.switch input:checked) .ball-8 { animation-duration: 1.35s; animation-d
   bottom: 16px;
   left: 50%;
   transform: translateX(-50%);
-  font-size: 0.9rem;
-  font-weight: 600;
+  font-size: 1.3rem;
+  font-weight: 700;
   letter-spacing: 0.06em;
-  padding: 10px 22px;
+  padding: 14px 30px;
   border-radius: 999px;
   background: rgba(255, 255, 255, 0.18);
   border: 2px solid rgba(255, 255, 255, 0.45);
