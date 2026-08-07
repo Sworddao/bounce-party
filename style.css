@@ -36,11 +36,6 @@ body {
   50%      { transform: rotate(2deg); }
 }
 
-.subtitle {
-  font-size: 1.1rem;
-  opacity: 0.9;
-}
-
 .stage {
   position: relative;
   width: min(700px, 90vw);
@@ -58,6 +53,11 @@ body {
   animation-name: bounce;
   animation-timing-function: cubic-bezier(0.28, 0.84, 0.42, 1);
   animation-iteration-count: infinite;
+  animation-play-state: paused;
+}
+
+body:has(.switch input:checked) .ball {
+  animation-play-state: running;
 }
 
 @keyframes bounce {
