@@ -109,6 +109,14 @@ body:has(.switch input:checked) .ball-8 { animation-duration: 1.35s; animation-d
   height: 0;
 }
 
+.subtitle {
+    text-align: center;
+    font-size: 1.3rem;
+    color: white;
+    margin-bottom: 20px;
+    font-weight: bold;
+}
+
 .slider {
   position: absolute;
   inset: 0;
