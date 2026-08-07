@@ -109,6 +109,24 @@ body:has(.switch input:checked) .ball-8 { animation-duration: 1.35s; animation-d
   height: 0;
 }
 
+.title {
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.08);
+    }
+
+    100% {
+        transform: scale(1);
+    }
+}
+
 .subtitle {
     text-align: center;
     font-size: 1.3rem;
