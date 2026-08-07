@@ -50,14 +50,13 @@ body {
   position: absolute;
   top: 0;
   font-size: 3rem;
-  animation-name: bounce;
+  animation-name: none;
   animation-timing-function: cubic-bezier(0.28, 0.84, 0.42, 1);
   animation-iteration-count: infinite;
-  animation-play-state: paused;
 }
 
 body:has(.switch input:checked) .ball {
-  animation-play-state: running;
+  animation-name: bounce;
 }
 
 @keyframes bounce {
