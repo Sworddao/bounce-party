@@ -31,9 +31,9 @@ body {
   position: fixed;
   top: 50%;
   left: 50%;
-  width: 100px;
-  height: 100px;
-  margin: -50px 0 0 -50px;
+  width: 150px;
+  height: 150px;
+  margin: -75px 0 0 -75px;
   border-radius: 50%;
   cursor: pointer;
   z-index: 20;
@@ -65,51 +65,51 @@ body {
 }
 
 .p-mercury {
-  --r: 85px;
+  --r: 100px;
   --speed: 4s;
-  width: 10px;
-  height: 10px;
-  margin: -5px 0 0 -5px;
-  background: radial-gradient(circle at 35% 35%, #dcdcdc, #8c8c8c);
-}
-.p-venus {
-  --r: 115px;
-  --speed: 6s;
-  width: 14px;
-  height: 14px;
-  margin: -7px 0 0 -7px;
-  background: radial-gradient(circle at 35% 35%, #f7e6b4, #c89b4a);
-}
-.p-earth {
-  --r: 150px;
-  --speed: 8s;
   width: 16px;
   height: 16px;
   margin: -8px 0 0 -8px;
+  background: radial-gradient(circle at 35% 35%, #dcdcdc, #8c8c8c);
+}
+.p-venus {
+  --r: 135px;
+  --speed: 6s;
+  width: 24px;
+  height: 24px;
+  margin: -12px 0 0 -12px;
+  background: radial-gradient(circle at 35% 35%, #f7e6b4, #c89b4a);
+}
+.p-earth {
+  --r: 175px;
+  --speed: 8s;
+  width: 28px;
+  height: 28px;
+  margin: -14px 0 0 -14px;
   background: radial-gradient(circle at 35% 35%, #7cd47c, #2f7fd6 65%, #1b5ba8);
 }
 .p-mars {
-  --r: 185px;
+  --r: 215px;
   --speed: 10s;
-  width: 13px;
-  height: 13px;
-  margin: -6.5px 0 0 -6.5px;
+  width: 22px;
+  height: 22px;
+  margin: -11px 0 0 -11px;
   background: radial-gradient(circle at 35% 35%, #f09a76, #c1442a);
 }
 .p-jupiter {
-  --r: 225px;
+  --r: 265px;
   --speed: 13s;
-  width: 30px;
-  height: 30px;
-  margin: -15px 0 0 -15px;
+  width: 50px;
+  height: 50px;
+  margin: -25px 0 0 -25px;
   background: radial-gradient(circle at 50% 50%, #f2d4a8, #e3b98c 40%, #b97a4a);
 }
 .p-saturn {
-  --r: 265px;
+  --r: 310px;
   --speed: 16s;
-  width: 26px;
-  height: 26px;
-  margin: -13px 0 0 -13px;
+  width: 44px;
+  height: 44px;
+  margin: -22px 0 0 -22px;
   background: radial-gradient(circle at 40% 40%, #f8eccb, #e6c98f 55%, #b99a5f);
 }
 .p-saturn::after {
@@ -120,24 +120,24 @@ body {
   width: 150%;
   height: 45%;
   margin: -22% 0 0 -75%;
-  border: 4px solid rgba(214, 190, 140, 0.8);
+  border: 5px solid rgba(214, 190, 140, 0.8);
   border-radius: 50%;
   transform: rotate(-18deg);
 }
 .p-uranus {
-  --r: 305px;
+  --r: 350px;
   --speed: 19s;
-  width: 18px;
-  height: 18px;
-  margin: -9px 0 0 -9px;
+  width: 30px;
+  height: 30px;
+  margin: -15px 0 0 -15px;
   background: radial-gradient(circle at 35% 35%, #b8f2f2, #57c2c2);
 }
 .p-neptune {
-  --r: 345px;
+  --r: 395px;
   --speed: 22s;
-  width: 17px;
-  height: 17px;
-  margin: -8.5px 0 0 -8.5px;
+  width: 28px;
+  height: 28px;
+  margin: -14px 0 0 -14px;
   background: radial-gradient(circle at 35% 35%, #7fa8f2, #3d5fd1);
 }
 
@@ -149,29 +149,52 @@ body {
   box-shadow: 0 0 8px rgba(255, 255, 255, 0.6);
 }
 
-/* ---------- Night: planets scatter ---------- */
+/* ---------- Night: planets scatter & bounce off the screen edges ---------- */
 
 body:has(#dark-toggle:checked) .planet {
-  animation: scatter 1.6s cubic-bezier(0.16, 1, 0.3, 1) forwards, drift 6s ease-in-out 1.6s infinite;
+  animation: var(--bounce) var(--bspeed) linear infinite;
 }
 
-@keyframes scatter {
-  to { transform: rotate(var(--a)) translateX(var(--d)) rotate(0deg); }
+@keyframes nightA {
+  0%   { transform: translate(-38vw, -28vh); }
+  25%  { transform: translate(42vw, -22vh); }
+  50%  { transform: translate(30vw, 40vh); }
+  75%  { transform: translate(-42vw, 28vh); }
+  100% { transform: translate(-38vw, -28vh); }
 }
 
-@keyframes drift {
-  0%, 100% { transform: rotate(var(--a)) translateX(var(--d)) rotate(0deg) translateY(0); }
-  50%      { transform: rotate(var(--a)) translateX(var(--d)) rotate(0deg) translateY(-16px); }
+@keyframes nightB {
+  0%   { transform: translate(-18vw, 38vh); }
+  25%  { transform: translate(40vw, 20vh); }
+  50%  { transform: translate(14vw, -42vh); }
+  75%  { transform: translate(-40vw, -14vh); }
+  100% { transform: translate(-18vw, 38vh); }
 }
 
-body:has(#dark-toggle:checked) .p-mercury { --a: 20deg;  --d: 130px; }
-body:has(#dark-toggle:checked) .p-venus   { --a: 100deg; --d: 160px; }
-body:has(#dark-toggle:checked) .p-earth    { --a: 180deg; --d: 180px; }
-body:has(#dark-toggle:checked) .p-mars     { --a: 250deg; --d: 140px; }
-body:has(#dark-toggle:checked) .p-jupiter  { --a: 320deg; --d: 210px; }
-body:has(#dark-toggle:checked) .p-saturn   { --a: 60deg;  --d: 250px; }
-body:has(#dark-toggle:checked) .p-uranus   { --a: 200deg; --d: 270px; }
-body:has(#dark-toggle:checked) .p-neptune  { --a: 140deg; --d: 300px; }
+@keyframes nightC {
+  0%   { transform: translate(38vw, -34vh); }
+  25%  { transform: translate(-38vw, -34vh); }
+  50%  { transform: translate(-30vw, 40vh); }
+  75%  { transform: translate(36vw, 38vh); }
+  100% { transform: translate(38vw, -34vh); }
+}
+
+@keyframes nightD {
+  0%   { transform: translate(-24vw, -8vh); }
+  25%  { transform: translate(26vw, 42vh); }
+  50%  { transform: translate(42vw, -32vh); }
+  75%  { transform: translate(-42vw, 18vh); }
+  100% { transform: translate(-24vw, -8vh); }
+}
+
+body:has(#dark-toggle:checked) .p-mercury { --bounce: nightA; --bspeed: 8s; }
+body:has(#dark-toggle:checked) .p-venus   { --bounce: nightB; --bspeed: 11s; }
+body:has(#dark-toggle:checked) .p-earth    { --bounce: nightC; --bspeed: 13s; }
+body:has(#dark-toggle:checked) .p-mars     { --bounce: nightD; --bspeed: 9s; }
+body:has(#dark-toggle:checked) .p-jupiter  { --bounce: nightA; --bspeed: 16s; animation-delay: -4s; }
+body:has(#dark-toggle:checked) .p-saturn   { --bounce: nightB; --bspeed: 15s; animation-delay: -7s; }
+body:has(#dark-toggle:checked) .p-uranus   { --bounce: nightC; --bspeed: 18s; animation-delay: -10s; }
+body:has(#dark-toggle:checked) .p-neptune  { --bounce: nightD; --bspeed: 20s; animation-delay: -13s; }
 
 /* ---------- Headings ---------- */
 
@@ -187,29 +210,6 @@ body:has(#dark-toggle:checked) .p-neptune  { --a: 140deg; --d: 300px; }
 @keyframes wiggle {
   0%, 100% { transform: rotate(-2deg); }
   50%      { transform: rotate(2deg); }
-}
-
-.subtitle {
-  font-size: 1.1rem;
-  opacity: 0.9;
-  position: relative;
-  z-index: 10;
-}
-
-.aura-badge {
-  font-size: 1rem;
-  font-weight: 800;
-  letter-spacing: 0.08em;
-  color: #fff;
-  padding: 6px 16px;
-  border-radius: 999px;
-  background: linear-gradient(120deg, #ff6b6b, #ffd93d, #ff6b6b);
-  background-size: 200% 200%;
-  animation: footerShimmer 2s ease-in-out infinite;
-  box-shadow: 0 0 18px rgba(255, 107, 107, 0.7);
-  transform: rotate(-4deg);
-  position: relative;
-  z-index: 10;
 }
 
 /* ---------- Day sky decorations ---------- */
