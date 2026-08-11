@@ -198,3 +198,21 @@ body:has(.switch input:checked) .ball-8 { animation-duration: 1.35s; animation-d
   font-size: 0.9rem;
   opacity: 0.8;
 }
+
+.party-button {
+  padding: 12px 28px;
+  border: none;
+  border-radius: 30px;
+  background: #ff6b6b;
+  color: white;
+  font-size: 1.1rem;
+  font-weight: bold;
+  cursor: pointer;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.party-button:hover {
+  transform: scale(1.08);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+}
