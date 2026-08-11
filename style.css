@@ -212,3 +212,19 @@ body:has(.switch input:checked) .ball-8 { animation-duration: 1.35s; animation-d
   50%  { background-position: 100% 50%; }
   100% { background-position: 0% 50%; }
 }
+
+.party-stats {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  justify-content: center;
+  font-size: 0.9rem;
+  opacity: 0.9;
+}
+
+.party-stats span {
+  padding: 8px 14px;
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.18);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}
