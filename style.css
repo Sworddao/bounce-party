@@ -25,14 +25,14 @@ body {
 }
 
 .sun {
-  position: absolute;
+  position: fixed;
   top: 8%;
   right: 10%;
   width: 110px;
   height: 110px;
   border-radius: 50%;
   cursor: pointer;
-  pointer-events: auto;
+  z-index: 1000;
   background: radial-gradient(circle, #fff8c0, #ffd93d 55%, #ff9f1a);
   box-shadow: 0 0 40px 20px rgba(255, 214, 60, 0.6), 0 0 140px 70px rgba(255, 214, 60, 0.3);
   animation: sunGlow 4s ease-in-out infinite;
