@@ -31,9 +31,9 @@ body {
   position: fixed;
   top: 50%;
   left: 50%;
-  width: 150px;
-  height: 150px;
-  margin: -75px 0 0 -75px;
+  width: 300px;
+  height: 300px;
+  margin: -150px 0 0 -150px;
   border-radius: 50%;
   cursor: pointer;
   z-index: 20;
@@ -56,7 +56,26 @@ body {
   left: 50%;
   border-radius: 50%;
   z-index: 5;
+}
+
+.planet.day {
   animation: orbit var(--speed) linear infinite;
+  opacity: 1;
+  transition: opacity 0.9s ease;
+}
+
+.planet.night {
+  animation: var(--bounce) var(--bspeed) linear infinite;
+  opacity: 0;
+  transition: opacity 0.9s ease;
+}
+
+body:has(#dark-toggle:checked) .planet.day {
+  opacity: 0;
+}
+
+body:has(#dark-toggle:checked) .planet.night {
+  opacity: 1;
 }
 
 @keyframes orbit {
@@ -65,51 +84,51 @@ body {
 }
 
 .p-mercury {
-  --r: 100px;
+  --r: 200px;
   --speed: 4s;
-  width: 16px;
-  height: 16px;
-  margin: -8px 0 0 -8px;
+  width: 32px;
+  height: 32px;
+  margin: -16px 0 0 -16px;
   background: radial-gradient(circle at 35% 35%, #dcdcdc, #8c8c8c);
 }
 .p-venus {
-  --r: 135px;
+  --r: 270px;
   --speed: 6s;
-  width: 24px;
-  height: 24px;
-  margin: -12px 0 0 -12px;
+  width: 48px;
+  height: 48px;
+  margin: -24px 0 0 -24px;
   background: radial-gradient(circle at 35% 35%, #f7e6b4, #c89b4a);
 }
 .p-earth {
-  --r: 175px;
+  --r: 350px;
   --speed: 8s;
-  width: 28px;
-  height: 28px;
-  margin: -14px 0 0 -14px;
+  width: 56px;
+  height: 56px;
+  margin: -28px 0 0 -28px;
   background: radial-gradient(circle at 35% 35%, #7cd47c, #2f7fd6 65%, #1b5ba8);
 }
 .p-mars {
-  --r: 215px;
+  --r: 430px;
   --speed: 10s;
-  width: 22px;
-  height: 22px;
-  margin: -11px 0 0 -11px;
-  background: radial-gradient(circle at 35% 35%, #f09a76, #c1442a);
-}
-.p-jupiter {
-  --r: 265px;
-  --speed: 13s;
-  width: 50px;
-  height: 50px;
-  margin: -25px 0 0 -25px;
-  background: radial-gradient(circle at 50% 50%, #f2d4a8, #e3b98c 40%, #b97a4a);
-}
-.p-saturn {
-  --r: 310px;
-  --speed: 16s;
   width: 44px;
   height: 44px;
   margin: -22px 0 0 -22px;
+  background: radial-gradient(circle at 35% 35%, #f09a76, #c1442a);
+}
+.p-jupiter {
+  --r: 530px;
+  --speed: 13s;
+  width: 100px;
+  height: 100px;
+  margin: -50px 0 0 -50px;
+  background: radial-gradient(circle at 50% 50%, #f2d4a8, #e3b98c 40%, #b97a4a);
+}
+.p-saturn {
+  --r: 620px;
+  --speed: 16s;
+  width: 88px;
+  height: 88px;
+  margin: -44px 0 0 -44px;
   background: radial-gradient(circle at 40% 40%, #f8eccb, #e6c98f 55%, #b99a5f);
 }
 .p-saturn::after {
@@ -120,24 +139,24 @@ body {
   width: 150%;
   height: 45%;
   margin: -22% 0 0 -75%;
-  border: 5px solid rgba(214, 190, 140, 0.8);
+  border: 6px solid rgba(214, 190, 140, 0.8);
   border-radius: 50%;
   transform: rotate(-18deg);
 }
 .p-uranus {
-  --r: 350px;
+  --r: 700px;
   --speed: 19s;
-  width: 30px;
-  height: 30px;
-  margin: -15px 0 0 -15px;
+  width: 60px;
+  height: 60px;
+  margin: -30px 0 0 -30px;
   background: radial-gradient(circle at 35% 35%, #b8f2f2, #57c2c2);
 }
 .p-neptune {
-  --r: 395px;
+  --r: 790px;
   --speed: 22s;
-  width: 28px;
-  height: 28px;
-  margin: -14px 0 0 -14px;
+  width: 56px;
+  height: 56px;
+  margin: -28px 0 0 -28px;
   background: radial-gradient(circle at 35% 35%, #7fa8f2, #3d5fd1);
 }
 
@@ -149,11 +168,7 @@ body {
   box-shadow: 0 0 8px rgba(255, 255, 255, 0.6);
 }
 
-/* ---------- Night: planets scatter & bounce off the screen edges ---------- */
-
-body:has(#dark-toggle:checked) .planet {
-  animation: var(--bounce) var(--bspeed) linear infinite;
-}
+/* ---------- Night: planets bounce off the screen edges ---------- */
 
 @keyframes nightA {
   0%   { transform: translate(-38vw, -28vh); }
