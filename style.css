@@ -104,6 +104,41 @@ body {
   to   { left: 110vw; }
 }
 
+.owl {
+  position: absolute;
+  bottom: 12%;
+  left: 8%;
+  font-size: 4rem;
+  display: none;
+  filter: drop-shadow(0 0 14px rgba(220, 230, 255, 0.35));
+  animation: owlBob 3s ease-in-out infinite;
+}
+
+@keyframes owlBob {
+  0%, 100% { transform: rotate(-3deg); }
+  50%      { transform: rotate(3deg); }
+}
+
+.bat {
+  position: absolute;
+  font-size: 2.2rem;
+  display: none;
+  animation: batFly linear infinite;
+  filter: drop-shadow(0 0 8px rgba(180, 200, 255, 0.4));
+}
+
+.bat-1 { top: 12%; animation-duration: 16s; animation-delay: -3s; }
+.bat-2 { top: 26%; animation-duration: 22s; animation-delay: -11s; }
+.bat-3 { top: 40%; animation-duration: 28s; animation-delay: -6s; }
+
+@keyframes batFly {
+  0%   { left: -12vw; transform: translateY(0) scaleX(1); }
+  25%  { transform: translateY(-22px) scaleX(1); }
+  50%  { transform: translateY(0) scaleX(-1); }
+  75%  { transform: translateY(-22px) scaleX(-1); }
+  100% { left: 112vw; transform: translateY(0) scaleX(-1); }
+}
+
 .starfield {
   position: fixed;
   inset: 0;
@@ -398,9 +433,18 @@ body:has(#dark-toggle:checked) .starfield{
     opacity: 1;
 }
 
-body:has(#dark-toggle:checked) .cloud,
+body:has(#dark-toggle:checked) .cloud{
+    background: rgba(28, 36, 66, 0.85);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5), 0 0 26px rgba(130, 150, 230, 0.18);
+}
+
 body:has(#dark-toggle:checked) .bird{
     display: none;
+}
+
+body:has(#dark-toggle:checked) .owl,
+body:has(#dark-toggle:checked) .bat{
+    display: block;
 }
 
 body:has(#dark-toggle:checked) .sun{
