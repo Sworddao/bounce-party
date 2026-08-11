@@ -239,3 +239,50 @@ body:has(#dark-toggle:checked) .footer{
 body:has(#dark-toggle:checked) .title{
     color: #ffe066;
 }
+
+/* ================================= */
+/* 📜 ENABLE PAGE SCROLLING */
+/* ================================= */
+
+html {
+    overflow-y: auto;
+}
+
+body {
+    overflow-x: hidden;
+    overflow-y: auto;
+    min-height: 100vh;
+    padding-bottom: 120px;
+}
+
+
+/* Make the new content fit naturally */
+
+.space-card {
+    flex-shrink: 0;
+}
+
+
+/* Keep footer visible but don't let it block content */
+
+.footer {
+    z-index: 100;
+}
+
+
+/* Mobile scrolling */
+
+@media (max-width: 600px) {
+    body {
+        overflow-y: auto;
+        padding-bottom: 140px;
+    }
+
+    .footer {
+        max-width: 90vw;
+        font-size: 0.9rem;
+        padding: 10px 15px;
+        white-space: normal;
+        text-align: center;
+    }
+}
