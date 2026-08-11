@@ -6,11 +6,12 @@ A fun, chaotic playground built with **pure HTML + CSS** (no JavaScript!).
 
 - 🪐 Eight emoji balls (🌍 🪐 ☄️ 🌙 ⭐ 👨‍🚀 🚀 🛰️) resting in the stage
 - **Party Mode** toggle — on by default: balls bounce forever; off: they gracefully fade and settle back down
-- 🌙 **Dark Mode** toggle for a night-sky vibe
-- ✨ Aura badge (`aura +67 🔥`) and a pulsing, wiggling title
+- ☀️ **Click the sun** to switch between day and night:
+  - **Day:** real blue sky with a glowing sun, drifting clouds, and birds flying across
+  - **Night:** the lights go out into deep space with twinkling stars, and the sun becomes a full moon
+- ✨ Aura badge (`aura +67 🔥`) and a wiggling title
 - 🎊 Confetti that falls while Party Mode is on (CSS-only checkbox toggle)
-- 🖱️ Balls glow and scale up when hovered
-- 🌈 Color-shifting gradient background that switches to deep space in dark mode
+- 🖱️ Balls glow and scale up when hovered, and squeeze a little bigger at the top of each bounce
 - 👥 Footer credits: sworddao, demonx-sage, UjjenTamrakar & yashaswikarmacharya10-rgb
 
 ## Try it
@@ -30,4 +31,4 @@ Change the emojis in `index.html` or tweak `animation-duration` in `style.css` t
 
 ## About
 
-A fun pure HTML + CSS playground - bouncing emojis, confetti, party mode toggle, dark mode, space theme
+A fun pure HTML + CSS playground - bouncing emojis, confetti, party mode toggle, day/night sky, space theme
