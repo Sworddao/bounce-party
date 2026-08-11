@@ -155,6 +155,16 @@ body:has(.switch input:checked) .ball-8 { animation-duration: 1.35s; animation-d
   transition: transform 0.3s;
 }
 
+.ball {
+  text-shadow: 0 0 12px rgba(255, 255, 255, 0.8);
+  filter: drop-shadow(0 5px 5px rgba(0, 0, 0, 0.2));
+}
+
+.ball:hover {
+  transform: scale(1.2);
+  cursor: pointer;
+}
+
 .switch input:checked + .slider {
   background: #ff6b6b;
 }
