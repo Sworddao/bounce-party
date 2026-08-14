@@ -1,15 +1,16 @@
 /* Solar Gravity - a cinematic 3D miniature solar system.
-   One continuous value drives the mood:
-   progress = 0  full day
-   progress = 1  full night
-   Planets revolve around the sun by day; once night fully settles they
-   gently phase out and bounce around the sky, then return at dawn.
+   A small state machine drives the sun's life and death:
+     active     - the sun shines, planets orbit
+     destroying - corona destabilizes (turbulence rises)
+     lightDelay - the compressed 8m 20s light-travel delay (sky stays bright)
+     disappearing - the sun collapses cleanly; light fades system-wide
+     absent     - deep space; planets coast on inertial trajectories
+     restoring  - the sun reforms, then planets curve back to their orbits
    A damped 3D camera, sun lighting, stars and rings are all derived
    per-frame from the same small state. */
 
 "use strict";
 
-const toggle = document.getElementById("dark-toggle");
 const root = document.documentElement;
 const world = document.getElementById("world");
 const sunEl = document.getElementById("sun");
@@ -24,24 +25,31 @@ const starPts = {
   mid: document.querySelector(".stars-mid .pts"),
   bright: document.querySelector(".stars-bright .pts"),
 };
+const statusEl = document.getElementById("status");
+const statusTitle = statusEl.querySelector(".status-title");
+const statusLines = statusEl.querySelector(".status-lines");
 
-const DURATION = 4000;          // ms for a full day<->night sweep
-const NIGHT_THRESHOLD = 0.9;    // scatter only starts once night fully hits
-const SCATTER_DURATION = 3000;  // ms for the orbit -> bounce phase-out
-const PERSP = 1400;             // camera perspective distance (px)
+const STATE = {
+  ACTIVE: "active",
+  DESTROYING: "destroying",
+  LIGHT_DELAY: "lightDelay",
+  DISAPPEARING: "disappearing",
+  ABSENT: "absent",
+  RESTORING: "restoring",
+};
+
+const DESTROY_DUR = 1.5;       // s of corona destabilization
+const LIGHT_DELAY_DUR = 2.0;   // s for the compressed 8m20s light delay
+const DISAPPEAR_DUR = 1.0;     // s for the sun to collapse cleanly
+const ESC_TRANS_DUR = 2.5;     // s to ease orbit -> inertial straight line
+const RESTORE_REFORM_DUR = 2.0; // s for the sun to reform
+const RESTORE_TOTAL_DUR = 6.5; // s for the full restoration arc
+const POST_SUN_TIME_SCALE = 1.8; // visualization speed-up for the 8m20s light-time
+const PERSP = 1400;            // camera perspective distance (px)
 
 const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 const isMobile = window.innerWidth < 640;
 const MOBILE_SCALE = isMobile ? 0.78 : 1;
-
-/* ---------- Night bounce paths, (x, y) offsets in vw/vh units ---------- */
-
-const nightPaths = [
-  [ { x: -0.38, y: -0.28 }, { x: 0.42, y: -0.22 }, { x: 0.30, y: 0.40 }, { x: -0.42, y: 0.28 } ],
-  [ { x: -0.18, y: 0.38 }, { x: 0.40, y: 0.20 }, { x: 0.14, y: -0.42 }, { x: -0.40, y: -0.14 } ],
-  [ { x: 0.38, y: -0.34 }, { x: -0.38, y: -0.34 }, { x: -0.30, y: 0.40 }, { x: 0.36, y: 0.38 } ],
-  [ { x: -0.24, y: -0.08 }, { x: 0.26, y: 0.42 }, { x: 0.42, y: -0.32 }, { x: -0.42, y: 0.18 } ],
-];
 
 /* ---------- Planet data ---------- */
 
@@ -49,49 +57,49 @@ const PLANETS = [
   {
     name: "Mercury", sel: ".p-mercury", labId: "lab-mercury", sizePx: 16,
     gap: 0.050, dir: 1, speed: 0.30, phase: 0.0, selfRot: 0.05,
-    tilt: 0.20, incl: 0.05, inclPhase: 0.0, path: 0, pathDuration: 8,
+    tilt: 0.20, incl: 0.05, inclPhase: 0.0, ambient: 0.22,
     info: { distance: "0.39 AU", size: "4,879 km", period: "88 days" },
   },
   {
     name: "Venus", sel: ".p-venus", labId: "lab-venus", sizePx: 24,
     gap: 0.075, dir: -1, speed: 0.24, phase: 1.7, selfRot: 0.03,
-    tilt: -0.15, incl: 0.05, inclPhase: 1.0, path: 1, pathDuration: 11,
+    tilt: -0.15, incl: 0.05, inclPhase: 1.0, ambient: 0.48,
     info: { distance: "0.72 AU", size: "12,104 km", period: "225 days" },
   },
   {
     name: "Earth", sel: ".p-earth", labId: "lab-earth", sizePx: 28,
     gap: 0.100, dir: 1, speed: 0.19, phase: 3.1, selfRot: 0.06,
-    tilt: 0.05, incl: 0.06, inclPhase: 2.0, path: 2, pathDuration: 13, clouds: true,
+    tilt: 0.05, incl: 0.06, inclPhase: 2.0, ambient: 0.20, clouds: true,
     info: { distance: "1.00 AU", size: "12,742 km", period: "365 days" },
   },
   {
     name: "Mars", sel: ".p-mars", labId: "lab-mars", sizePx: 22,
     gap: 0.125, dir: -1, speed: 0.16, phase: 4.5, selfRot: 0.03,
-    tilt: -0.25, incl: 0.06, inclPhase: 3.0, path: 3, pathDuration: 9,
+    tilt: -0.25, incl: 0.06, inclPhase: 3.0, ambient: 0.30,
     info: { distance: "1.52 AU", size: "6,779 km", period: "687 days" },
   },
   {
     name: "Jupiter", sel: ".p-jupiter", labId: "lab-jupiter", sizePx: 52,
     gap: 0.150, dir: 1, speed: 0.11, phase: 0.9, selfRot: 0.10,
-    tilt: 0.10, incl: 0.07, inclPhase: 0.5, path: 0, pathDuration: 16,
+    tilt: 0.10, incl: 0.07, inclPhase: 0.5, ambient: 0.30,
     info: { distance: "5.20 AU", size: "139,820 km", period: "11.9 years" },
   },
   {
     name: "Saturn", sel: ".p-saturn", labId: "lab-saturn", sizePx: 46,
     gap: 0.180, dir: -1, speed: 0.09, phase: 2.3, selfRot: 0.06,
-    tilt: -0.10, incl: 0.08, inclPhase: 1.5, path: 1, pathDuration: 15, rings: true,
+    tilt: -0.10, incl: 0.08, inclPhase: 1.5, ambient: 0.30, rings: true,
     info: { distance: "9.58 AU", size: "116,460 km", period: "29.4 years" },
   },
   {
     name: "Uranus", sel: ".p-uranus", labId: "lab-uranus", sizePx: 30,
     gap: 0.210, dir: 1, speed: 0.07, phase: 5.2, selfRot: 0.04,
-    tilt: 0.15, incl: 0.08, inclPhase: 2.5, path: 2, pathDuration: 18,
+    tilt: 0.15, incl: 0.08, inclPhase: 2.5, ambient: 0.34,
     info: { distance: "19.2 AU", size: "50,724 km", period: "84 years" },
   },
   {
     name: "Neptune", sel: ".p-neptune", labId: "lab-neptune", sizePx: 29,
     gap: 0.240, dir: -1, speed: 0.05, phase: 6.0, selfRot: 0.03,
-    tilt: -0.05, incl: 0.09, inclPhase: 3.5, path: 3, pathDuration: 20,
+    tilt: -0.05, incl: 0.09, inclPhase: 3.5, ambient: 0.36,
     info: { distance: "30.0 AU", size: "49,244 km", period: "165 years" },
   },
 ];
@@ -103,25 +111,24 @@ const planets = PLANETS.map((def, i) => ({
   labEl: document.getElementById(def.labId),
   angle: def.phase,
   selfAngle: 0,
-  pathTime: Math.random(),
   proj: { sx: 0, sy: 0, sz: 0, ss: 1 },
   zIndex: 10,
+  esc: null,
 }));
 
 /* ---------- State ---------- */
 
-let progress = 0;            // current animated mood
-let target = 0;              // where we are heading
-let scatterProgress = 0;     // 0 = orbiting the sun, 1 = fully bouncing
-let scatterTarget = 0;
-let camYaw = 0;              // damped camera angles (radians)
+let state = STATE.ACTIVE;
+let phaseT = 0;               // seconds elapsed inside the current state
+let escAge = 0;               // seconds since the sun disappeared
+let camYaw = 0;               // damped camera angles (radians)
 let camPitch = 0;
 let camYawTarget = 0;
 let camPitchTarget = 0;
 let autoYaw = 0;
 let autoRotate = false;
 let camEnabled = true;
-let parX = 0;                // cursor parallax (normalised -0.5..0.5)
+let parX = 0;                 // cursor parallax (normalised -0.5..0.5)
 let parY = 0;
 let parTX = 0;
 let parTY = 0;
@@ -130,10 +137,8 @@ let selectedIndex = -1;
 let rafId = null;
 let lastTime = null;
 
-let U = 0;                   // base unit = min(vw, vh) * scale
+let U = 0;                    // base unit = min(vw, vh) * scale
 let sunR = isMobile ? 50 : 75;
-let currentNight = 0;
-let currentSink = 0;
 
 /* ---------- Math helpers ---------- */
 
@@ -148,11 +153,6 @@ function easeInOutSine(value) {
 function smoothstep(edge0, edge1, value) {
   const t = clamp01((value - edge0) / (edge1 - edge0));
   return t * t * (3 - 2 * t);
-}
-
-function bell(center, width, value) {
-  const d = (value - center) / width;
-  return Math.exp(-d * d);
 }
 
 function lerp(a, b, t) {
@@ -185,17 +185,15 @@ function ellipsePoint(rx, ry, tilt, angle) {
   };
 }
 
-/* Walk a bounce path as a closed loop (linear segments = bouncing corners). */
-function samplePath(path, t) {
-  const n = path.length;
-  const scaled = t * n;
-  const i = Math.floor(scaled) % n;
-  const local = scaled - Math.floor(scaled);
-  const a = path[i];
-  const b = path[(i + 1) % n];
+/* Tangent direction of the ellipse at `angle` (the derivative). */
+function ellipseTangent(rx, ry, tilt, angle) {
+  const c = Math.cos(tilt);
+  const s = Math.sin(tilt);
+  const dex = -rx * Math.sin(angle);
+  const dey = ry * Math.cos(angle);
   return {
-    x: a.x + (b.x - a.x) * local,
-    y: a.y + (b.y - a.y) * local,
+    x: dex * c - dey * s,
+    y: dex * s + dey * c,
   };
 }
 
@@ -269,59 +267,106 @@ function buildStars() {
   starPts.bright.style.boxShadow = bright;
 }
 
-/* ---------- Phase curves (continuous, blended, no hard edges)
-   DAY      0.00 - 0.55
-   SUNSET   0.55 - 0.70
-   TWILIGHT 0.70 - 0.85
-   NIGHT    0.85 - 1.00   */
+/* ---------- Escape trajectories ---------- */
 
-function cloudColor(sunset, night) {
-  const white = [255, 255, 255];
-  const warm = [255, 217, 160];
-  const navy = [28, 36, 66];
-  let r = white[0] + (warm[0] - white[0]) * sunset;
-  let g = white[1] + (warm[1] - white[1]) * sunset;
-  let b = white[2] + (warm[2] - white[2]) * sunset;
-  r = r + (navy[0] - r) * night;
-  g = g + (navy[1] - g) * night;
-  b = b + (navy[2] - b) * night;
-  return "rgb(" + Math.round(r) + ", " + Math.round(g) + ", " + Math.round(b) + ")";
+/* Capture each planet's position and tangential velocity at the exact
+   moment the sun's influence vanishes (DISAPPEARING -> ABSENT). The
+   tangent already carries the ellipse scale, so the escape speed is the
+   orbital angular speed scaled by POST_SUN_TIME_SCALE. */
+function recordEscape() {
+  for (const p of planets) {
+    const e = ellipsePoint(p.orbitPx.rx, p.orbitPx.ry, p.tilt, p.angle);
+    const t = ellipseTangent(p.orbitPx.rx, p.orbitPx.ry, p.tilt, p.angle);
+    const vMag = p.speed * POST_SUN_TIME_SCALE * p.dir;
+    p.esc = {
+      x: e.x,
+      y: e.y,
+      z: Math.sin(p.angle + p.inclPhase) * p.incl * U,
+      vx: t.x * vMag,
+      vy: t.y * vMag,
+      angle: p.angle,
+    };
+  }
 }
 
-function applyPhase(value) {
-  currentNight = smoothstep(0.45, 0.95, value);
-  const sunset = bell(0.62, 0.14, value);
-  const twilight = bell(0.78, 0.12, value);
+/* Straight-line inertial position `a` seconds after escape. */
+function escapePos(p, a) {
+  return {
+    x: p.esc.x + p.esc.vx * a,
+    y: p.esc.y + p.esc.vy * a,
+    z: p.esc.z,
+  };
+}
 
-  setVar("--night", currentNight);
-  setVar("--sunset", sunset);
-  setVar("--twilight", twilight);
+/* ---------- Environment (per-frame CSS variables) ---------- */
 
-  setVar("--stars", smoothstep(0.5, 0.9, value));
+function applyEnv() {
+  let sunLive = 1;
+  let illum = 1;
+  let skyLevel = 0;
+  let remn = 0;
+  let turb = 0;
+  let lf = 0;
 
-  // Sun: warms at sunset, sinks, fades out; eclipse disc covers it at night.
-  currentSink = smoothstep(0.35, 0.9, value) * 160;
-  setVar("--sun-sink", currentSink + "px");
-  setVar("--sun-fade", (1 - smoothstep(0.5, 0.92, value)).toFixed(3));
-  setVar("--eclipse", currentNight);
-  setVar("--sun-a", mixColor("#fffbe0", "#ffe3a8", sunset));
-  setVar("--sun-b", mixColor("#ffd93d", "#ff9a2a", sunset));
-  setVar("--sun-c", mixColor("#ff9f1a", "#f4641a", sunset));
-  setVar("--sun-d", mixColor("#e8670a", "#b93808", sunset));
+  if (state === STATE.DISAPPEARING) {
+    const k = clamp01(phaseT / DISAPPEAR_DUR);
+    sunLive = 1 - k;
+    illum = 1 - k;
+    skyLevel = k;
+    remn = k;
+    turb = 1 - k * 0.7;
+    lf = Math.max(0, 1 - k * 1.2);
+  } else if (state === STATE.ABSENT) {
+    sunLive = 0;
+    illum = 0;
+    skyLevel = 1;
+    remn = 1;
+    turb = 0;
+    lf = 0;
+  } else if (state === STATE.RESTORING) {
+    const reform = smoothstep(0, RESTORE_REFORM_DUR, phaseT);
+    sunLive = reform;
+    illum = reform;
+    skyLevel = 1 - reform;
+    remn = 1 - reform;
+    turb = (1 - reform) * 0.5;
+    lf = 0;
+  } else if (state === STATE.DESTROYING) {
+    turb = clamp01(phaseT / DESTROY_DUR);
+  } else if (state === STATE.LIGHT_DELAY) {
+    turb = 1;
+    lf = clamp01(phaseT / LIGHT_DELAY_DUR);
+  }
 
-  // Clouds: bright by day, warm at sunset, faint and dark at night.
-  setVar("--cloud-bg", cloudColor(sunset, currentNight));
-  setVar("--cloud-fade", (1 - currentNight * 0.65).toFixed(3));
+  const boil = sunLive * (0.45 + 0.4 * turb);
+  setVar("--space", skyLevel.toFixed(3));
+  setVar("--illum", illum.toFixed(3));
+  setVar("--sun-live", sunLive.toFixed(3));
+  setVar("--turb", turb.toFixed(3));
+  setVar("--boil", boil.toFixed(3));
+  setVar("--remnant", remn.toFixed(3));
+  setVar("--delay", lf.toFixed(3));
+  setVar("--lf-s", (1 + lf * 3.2).toFixed(3));
+  setVar("--lf-o", (lf * 0.85).toFixed(3));
+  setVar("--pulse-s", (1 + turb * 0.5).toFixed(3));
+  setVar("--face-op", lerp(0.4, 1, illum).toFixed(3));
+  setVar("--stars", skyLevel.toFixed(3));
 
-  // Silhouettes: birds fade out at dusk, rockets fade in for the night.
-  setVar("--bird-fade", (1 - smoothstep(0.45, 0.75, value)).toFixed(3));
-  setVar("--nightlife-fade", smoothstep(0.55, 0.8, value));
+  // The photosphere warms as the corona destabilizes.
+  setVar("--sun-a", mixColor("#fffbe0", "#ffd9a0", turb));
+  setVar("--sun-b", mixColor("#ffd93d", "#ffb02a", turb));
+  setVar("--sun-c", mixColor("#ff9f1a", "#ff7a1a", turb));
+  setVar("--sun-d", mixColor("#e8670a", "#d84a08", turb));
+
+  // Clouds, birds and planes only belong to daylight.
+  setVar("--cloud-fade", (1 - skyLevel).toFixed(3));
+  setVar("--bird-fade", (1 - skyLevel).toFixed(3));
 
   // Interface colouring adapts to the sky.
-  setVar("--ui-text", mixColor("#123a6b", "#e8e4f4", currentNight));
-  setVar("--title-color", mixColor("#0b2a5e", "#f5e6c0", currentNight));
-  setVar("--title-glow", mixRgba("#ffffff", "#ffd98f", currentNight, 0.85));
-  setVar("--orbit-c", mixColor("#4a5f96", "#c8d8ff", currentNight));
+  setVar("--ui-text", mixColor("#123a6b", "#dfe6ff", skyLevel));
+  setVar("--title-color", mixColor("#0b2a5e", "#e8f0ff", skyLevel));
+  setVar("--title-glow", mixRgba("#ffffff", "#cdd8ff", skyLevel, 0.85));
+  setVar("--orbit-c", mixColor("#4a5f96", "#b8c8ff", skyLevel));
 }
 
 /* ---------- Render ---------- */
@@ -329,6 +374,35 @@ function applyPhase(value) {
 function setSvgSize() {
   const svg = document.getElementById("orbits");
   svg.setAttribute("viewBox", "0 0 " + window.innerWidth + " " + window.innerHeight);
+}
+
+function worldPosition(p) {
+  if (state === STATE.ABSENT || state === STATE.RESTORING) {
+    const o = p.esc;
+    const ep = escapePos(p, escAge);
+    if (state === STATE.ABSENT) {
+      const k = easeInOutSine(clamp01(escAge / ESC_TRANS_DUR));
+      return {
+        x: lerp(o.x, ep.x, k),
+        y: lerp(o.y, ep.y, k),
+        z: o.z,
+      };
+    }
+    const b = smoothstep(RESTORE_REFORM_DUR, RESTORE_TOTAL_DUR, phaseT);
+    const wob = Math.sin(o.angle + p.inclPhase) * p.incl * U;
+    const orb = ellipsePoint(p.orbitPx.rx, p.orbitPx.ry, p.tilt, o.angle);
+    return {
+      x: lerp(ep.x, orb.x, b),
+      y: lerp(ep.y, orb.y, b),
+      z: lerp(o.z, wob, b),
+    };
+  }
+  const e = ellipsePoint(p.orbitPx.rx, p.orbitPx.ry, p.tilt, p.angle);
+  return {
+    x: e.x,
+    y: e.y,
+    z: Math.sin(p.angle + p.inclPhase) * p.incl * U,
+  };
 }
 
 function render(yaw, pitch) {
@@ -340,30 +414,22 @@ function render(yaw, pitch) {
   const syw = Math.sin(yaw);
   const cpx = Math.cos(pitch);
   const spx = Math.sin(pitch);
-  const orbitOffY = currentSink * 0.35;
-  const lightY = cy + currentSink;
-  const scatter = easeInOutSine(scatterProgress);
-  const night = currentNight;
+  const illum = parseFloat(root.style.getPropertyValue("--illum") || "1");
   const tNow = performance.now() / 1000;
 
   for (const p of planets) {
-    const e = ellipsePoint(p.orbitPx.rx, p.orbitPx.ry, p.tilt, p.angle);
-    const wob = Math.sin(p.angle + p.inclPhase) * p.incl * U;
-    const day = project(e.x, e.y + orbitOffY, wob, cyw, syw, cpx, spx);
-    const np = samplePath(nightPaths[p.path], p.pathTime);
-    const nx = np.x * vw;
-    const ny = np.y * vh;
-
-    const sx = lerp(day.x, nx - cx, scatter);
-    const sy = lerp(day.y, ny - cy, scatter);
-    const sz = day.z * (1 - scatter);
-    const ss = lerp(day.s, 1, scatter);
+    const w = worldPosition(p);
+    const pr = project(w.x, w.y, w.z, cyw, syw, cpx, spx);
+    const sx = pr.x;
+    const sy = pr.y;
+    const sz = pr.z;
+    const ss = pr.s;
     p.proj = { sx: sx, sy: sy, sz: sz, ss: ss };
 
     // Face the bright side toward the sun, compensating the planet's spin.
-    const face = Math.atan2(cy + sy - lightY, cx + sx - cx) * 180 / Math.PI - p.selfAngle * 180 / Math.PI;
+    const face = Math.atan2(sy, sx) * 180 / Math.PI - p.selfAngle * 180 / Math.PI;
     const posLight = Math.min(1.25, Math.max(0.6, 0.82 + (ss - 1) * 1.6));
-    const b = posLight * (1 - night * 0.35);
+    const b = posLight * lerp(p.ambient, 1, illum);
 
     p.el.style.transform =
       "translate3d(" + sx.toFixed(2) + "px," + sy.toFixed(2) + "px,0) " +
@@ -409,7 +475,7 @@ function render(yaw, pitch) {
     const pts = p.orbitPx.pts;
     let d = "";
     for (let k = 0; k < pts.length; k++) {
-      const pr = project(pts[k].x, pts[k].y + orbitOffY, pts[k].z, cyw, syw, cpx, spx);
+      const pr = project(pts[k].x, pts[k].y, pts[k].z, cyw, syw, cpx, spx);
       d += (k ? "L" : "M") + (cx + pr.x).toFixed(1) + " " + (cy + pr.y).toFixed(1);
     }
     d += "Z";
@@ -444,86 +510,169 @@ function render(yaw, pitch) {
   }
 }
 
-/* ---------- Animation loop ---------- */
+/* ---------- State machine ---------- */
 
-function frame(time) {
-  if (lastTime === null) lastTime = time;
-  const dt = Math.min(100, time - lastTime);
-  lastTime = time;
-  const dtSec = dt / 1000;
-
-  const dir = target >= progress ? 1 : -1;
-  progress += dir * (dt / DURATION);
-  if ((dir === 1 && progress >= target) || (dir === -1 && progress <= target)) {
-    progress = target;
+function step(dtSec) {
+  phaseT += dtSec;
+  switch (state) {
+    case STATE.DESTROYING:
+      if (phaseT >= DESTROY_DUR) {
+        state = STATE.LIGHT_DELAY;
+        phaseT = 0;
+        updateStatus();
+        updateSunUI();
+      }
+      break;
+    case STATE.LIGHT_DELAY:
+      if (phaseT >= LIGHT_DELAY_DUR) {
+        state = STATE.DISAPPEARING;
+        phaseT = 0;
+        updateStatus();
+        updateSunUI();
+      }
+      break;
+    case STATE.DISAPPEARING:
+      if (phaseT >= DISAPPEAR_DUR) {
+        recordEscape();
+        escAge = 0;
+        state = STATE.ABSENT;
+        phaseT = 0;
+        updateStatus();
+        updateSunUI();
+      }
+      break;
+    case STATE.ABSENT:
+      escAge += dtSec;
+      break;
+    case STATE.RESTORING:
+      escAge += dtSec;
+      if (phaseT >= RESTORE_TOTAL_DUR) {
+        for (const p of planets) p.esc = null;
+        escAge = 0;
+        state = STATE.ACTIVE;
+        phaseT = 0;
+        updateStatus();
+        updateSunUI();
+      }
+      break;
   }
-
-  // Planets only phase out once night fully hits (and wait for true day
-  // before returning to their orbits).
-  scatterTarget = progress >= NIGHT_THRESHOLD ? 1 : 0;
-  if (scatterProgress < scatterTarget) {
-    scatterProgress = Math.min(scatterTarget, scatterProgress + dt / SCATTER_DURATION);
-  } else if (scatterProgress > scatterTarget) {
-    scatterProgress = Math.max(scatterTarget, scatterProgress - dt / SCATTER_DURATION);
-  }
-
-  const damp = 1 - Math.exp(-dt / 450);
-  if (camEnabled) {
-    camYaw += (camYawTarget - camYaw) * damp;
-    camPitch += (camPitchTarget - camPitch) * damp;
-  }
-  if (autoRotate) autoYaw += dtSec * 0.05;
-  parX += (parTX - parX) * damp;
-  parY += (parTY - parY) * damp;
-
-  for (const p of planets) {
-    p.angle += p.speed * p.dir * dtSec;
-    p.selfAngle += p.selfRot * dtSec;
-    p.pathTime = (p.pathTime + dtSec / p.pathDuration) % 1;
-  }
-
-  applyPhase(progress);
-  world.style.transform =
-    "translate3d(" + (parX * 12).toFixed(2) + "px," + (parY * 10).toFixed(2) + "px,0)";
-  render(camYaw + autoYaw, camPitch);
-
-  rafId = requestAnimationFrame(frame);
 }
 
-function animateTo(next) {
-  target = next;
-  updateDayNightButton();
+function beginDestroy() {
+  if (state !== STATE.ACTIVE) return;
+  state = STATE.DESTROYING;
+  phaseT = 0;
   if (reducedMotion) {
-    progress = target;
-    scatterProgress = target >= NIGHT_THRESHOLD ? 1 : 0;
-    applyPhase(progress);
+    recordEscape();
+    escAge = ESC_TRANS_DUR + 3;
+    state = STATE.ABSENT;
+    phaseT = 0;
+    applyEnv();
     render(0, 0);
-    return;
   }
-  if (rafId === null) rafId = requestAnimationFrame(frame);
+  updateStatus();
+  updateSunUI();
+}
+
+function beginRestore() {
+  if (state !== STATE.ABSENT) return;
+  state = STATE.RESTORING;
+  phaseT = 0;
+  if (reducedMotion) {
+    for (const p of planets) p.esc = null;
+    escAge = 0;
+    state = STATE.ACTIVE;
+    phaseT = 0;
+    applyEnv();
+    render(0, 0);
+  }
+  updateStatus();
+  updateSunUI();
+}
+
+function toggleSun() {
+  if (state === STATE.ACTIVE) beginDestroy();
+  else if (state === STATE.ABSENT) beginRestore();
+}
+
+/* ---------- Status + sun UI ---------- */
+
+const STATUS_TEXT = {
+  [STATE.ACTIVE]: {
+    title: "SUN ACTIVE",
+    lines: ["Solar gravity: active", "Solar radiation: active"],
+  },
+  [STATE.DESTROYING]: {
+    title: "SOLAR EVENT",
+    lines: ["Solar destabilization detected", "Corona turbulence rising"],
+  },
+  [STATE.LIGHT_DELAY]: {
+    title: "LIGHT TRAVEL DELAY",
+    lines: ["Propagation delay: 8m 20s", "Earth still receives sunlight until the last photons arrive"],
+  },
+  [STATE.DISAPPEARING]: {
+    title: "SOLAR COLLAPSE",
+    lines: ["Final photons departing", "Sunlight fading across the system"],
+  },
+  [STATE.ABSENT]: {
+    title: "SUN ABSENT",
+    lines: ["Solar illumination: none", "Planets: inertial trajectories"],
+  },
+  [STATE.RESTORING]: {
+    title: "SOLAR RESTORATION",
+    lines: ["Re-establishing illumination...", "Re-establishing orbital model..."],
+  },
+};
+
+function updateStatus() {
+  const text = STATUS_TEXT[state];
+  statusTitle.textContent = text.title;
+  statusLines.innerHTML = text.lines.join("<br>");
+  document.body.classList.toggle("count-on", state === STATE.LIGHT_DELAY || state === STATE.DISAPPEARING);
 }
 
 /* ---------- Controls ---------- */
 
-const ctlDaynight = document.getElementById("ctl-daynight");
+const ctlSun = document.getElementById("ctl-sun");
 const ctlCamera = document.getElementById("ctl-camera");
 const ctlOrbits = document.getElementById("ctl-orbits");
 const ctlLabels = document.getElementById("ctl-labels");
 const ctlRotate = document.getElementById("ctl-rotate");
 
-function updateDayNightButton() {
-  ctlDaynight.textContent = toggle.checked ? "Day" : "Night";
-  ctlDaynight.setAttribute("aria-pressed", String(toggle.checked));
+function updateSunUI() {
+  if (state === STATE.ACTIVE) {
+    ctlSun.textContent = "Destroy Sun";
+    ctlSun.disabled = false;
+    ctlSun.setAttribute("aria-pressed", "false");
+    sunEl.setAttribute("aria-label", "Destroy the Sun");
+    sunEl.title = "Click to destroy the Sun";
+  } else if (state === STATE.ABSENT) {
+    ctlSun.textContent = "Restore Sun";
+    ctlSun.disabled = false;
+    ctlSun.setAttribute("aria-pressed", "true");
+    sunEl.setAttribute("aria-label", "Restore the Sun");
+    sunEl.title = "Click to restore the Sun";
+  } else {
+    ctlSun.textContent = state === STATE.RESTORING ? "Restoring..." : "Destroying...";
+    ctlSun.disabled = true;
+    ctlSun.setAttribute("aria-pressed", "true");
+    sunEl.setAttribute("aria-label", "Solar event in progress");
+    sunEl.title = "";
+  }
 }
 
-toggle.addEventListener("change", function () {
-  animateTo(toggle.checked ? 1 : 0);
-  updateDayNightButton();
+ctlSun.addEventListener("click", toggleSun);
+
+sunEl.addEventListener("click", function (event) {
+  event.stopPropagation();
+  toggleSun();
 });
 
-ctlDaynight.addEventListener("click", function () {
-  toggle.checked = !toggle.checked;
-  toggle.dispatchEvent(new Event("change"));
+sunEl.addEventListener("keydown", function (event) {
+  if (event.key === "Enter" || event.key === " ") {
+    event.preventDefault();
+    toggleSun();
+  }
 });
 
 ctlCamera.addEventListener("click", function () {
@@ -549,6 +698,39 @@ ctlRotate.addEventListener("click", function () {
   ctlRotate.classList.toggle("active", autoRotate);
   ctlRotate.setAttribute("aria-pressed", String(autoRotate));
 });
+
+/* ---------- Animation loop ---------- */
+
+function frame(time) {
+  if (lastTime === null) lastTime = time;
+  const dt = Math.min(100, time - lastTime);
+  lastTime = time;
+  const dtSec = dt / 1000;
+
+  step(dtSec);
+
+  const damp = 1 - Math.exp(-dt / 450);
+  if (camEnabled) {
+    camYaw += (camYawTarget - camYaw) * damp;
+    camPitch += (camPitchTarget - camPitch) * damp;
+  }
+  if (autoRotate) autoYaw += dtSec * 0.05;
+  parX += (parTX - parX) * damp;
+  parY += (parTY - parY) * damp;
+
+  const orbiting = state !== STATE.ABSENT && state !== STATE.RESTORING;
+  for (const p of planets) {
+    if (orbiting) p.angle += p.speed * p.dir * dtSec;
+    p.selfAngle += p.selfRot * dtSec;
+  }
+
+  applyEnv();
+  world.style.transform =
+    "translate3d(" + (parX * 12).toFixed(2) + "px," + (parY * 10).toFixed(2) + "px,0)";
+  render(camYaw + autoYaw, camPitch);
+
+  rafId = requestAnimationFrame(frame);
+}
 
 /* ---------- Pointer interaction ---------- */
 
@@ -611,13 +793,14 @@ window.addEventListener("resize", function () {
 
 /* ---------- Start ---------- */
 
-applyPhase(0);
+applyEnv();
 computeScale();
 buildOrbits();
 setSvgSize();
 buildStars();
 render(0, 0);
-updateDayNightButton();
+updateSunUI();
+updateStatus();
 
 if (!reducedMotion) {
   rafId = requestAnimationFrame(frame);

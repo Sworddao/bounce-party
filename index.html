@@ -8,21 +8,17 @@
 </head>
 <body>
 
-  <!-- Layered sky: day base, sunset, twilight, night, haze, vignette -->
+  <!-- Sky: bright day base, deep-space overlay, clouds, silhouettes, vignette -->
   <div class="sky" aria-hidden="true">
-    <div class="sky-day"></div>
-    <div class="sky-sunset"></div>
-    <div class="sky-twilight"></div>
-    <div class="sky-night"></div>
-    <div class="sky-haze"></div>
-    <div class="sky-vignette"></div>
+    <div class="sky-space"></div>
+    <div class="milkyway"></div>
     <div class="cloud cloud-1"></div>
     <div class="cloud cloud-2"></div>
     <div class="cloud cloud-3"></div>
     <div class="silhouette sil-bird sil-bird-1"></div>
     <div class="silhouette sil-bird sil-bird-2"></div>
     <div class="silhouette sil-plane"></div>
-    <div class="silhouette sil-rocket"></div>
+    <div class="sky-vignette"></div>
   </div>
 
   <!-- Starfield: generated star layers, nebula, galaxy -->
@@ -34,22 +30,20 @@
     <div class="galaxy"></div>
   </div>
 
-  <input type="checkbox" id="dark-toggle" hidden aria-hidden="true" />
-
-  <!-- The solar system: orbits, sun toggle, planets, rings, labels -->
+  <!-- The solar system: orbits, the sun, planets, rings, labels -->
   <div class="world" id="world" aria-hidden="true">
     <svg class="orbits" id="orbits">
       <path></path><path></path><path></path><path></path>
       <path></path><path></path><path></path><path></path>
     </svg>
 
-    <label for="dark-toggle" class="sun" id="sun" title="Click to switch between day and night">
-      <span class="sun-body">
-        <span class="sun-corona"></span>
-        <span class="sun-disc"></span>
-        <span class="sun-eclipse"></span>
-      </span>
-    </label>
+    <div class="sun" id="sun" role="button" tabindex="0" aria-label="Destroy the Sun" title="Click to destroy the Sun">
+      <span class="sun-flares"></span>
+      <span class="sun-corona"></span>
+      <span class="sun-disc"></span>
+      <span class="sun-remnant"></span>
+      <span class="light-front"></span>
+    </div>
 
     <div class="planet p-mercury"></div>
     <div class="planet p-venus"></div>
@@ -79,12 +73,22 @@
   </header>
 
   <nav class="controls" id="controls" aria-label="Display controls">
-    <button type="button" id="ctl-daynight" class="ctl" aria-pressed="false">Night</button>
+    <button type="button" id="ctl-sun" class="ctl" aria-pressed="false">Destroy Sun</button>
     <button type="button" id="ctl-camera" class="ctl active" aria-pressed="true">Camera</button>
     <button type="button" id="ctl-orbits" class="ctl" aria-pressed="false">Orbits</button>
     <button type="button" id="ctl-labels" class="ctl" aria-pressed="false">Labels</button>
     <button type="button" id="ctl-rotate" class="ctl" aria-pressed="false">Rotate</button>
   </nav>
+
+  <aside id="status" class="status" aria-live="polite">
+    <div class="status-title">SUN ACTIVE</div>
+    <div class="status-lines"></div>
+    <div class="status-count">
+      <div class="status-bar"><span id="status-bar-fill" class="status-bar-fill"></span></div>
+    </div>
+  </aside>
+
+  <p class="disclaimer">In reality, sunlight and the Sun's gravitational influence would take about 8m 20s to reach Earth. This visualization compresses that delay.</p>
 
   <footer class="footer">Made by sworddao, demonx-sage, UjjenTamrakar &amp; yashaswikarmacharya10-rgb</footer>
 

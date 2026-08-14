@@ -5,21 +5,24 @@
 }
 
 :root {
-  --night: 0;          /* 0 = day, 1 = full night */
-  --sunset: 0;         /* peaks in the golden hour */
-  --twilight: 0;       /* peaks in the blue hour */
+  --space: 0;          /* 0 = bright day, 1 = deep space */
+  --illum: 1;          /* solar illumination reaching the planets */
+  --sun-live: 1;       /* visible sun intensity (collapse fades this) */
+  --turb: 0;           /* corona turbulence during destabilization */
+  --boil: 1;           /* photosphere granulation intensity */
+  --remnant: 0;        /* remnant marker visibility after the sun fades */
+  --delay: 0;          /* light-front progress, 0..1 */
+  --lf-s: 1;           /* light-front ring scale */
+  --lf-o: 0;           /* light-front ring opacity */
+  --pulse-s: 1;        /* corona pulse scale */
+  --face-op: 1;        /* planet shading overlay opacity */
   --stars: 0;          /* starfield visibility */
-  --sun-sink: 0px;     /* sun sinking toward the horizon */
-  --sun-fade: 1;       /* sun visibility */
-  --eclipse: 0;        /* dark eclipse disc over the sun at night */
+  --cloud-fade: 1;     /* clouds / birds / planes fade with deep space */
+  --bird-fade: 1;
   --sun-a: #fffbe0;
   --sun-b: #ffd93d;
   --sun-c: #ff9f1a;
   --sun-d: #e8670a;
-  --cloud-bg: rgb(255, 255, 255);
-  --cloud-fade: 1;
-  --bird-fade: 1;      /* day silhouettes */
-  --nightlife-fade: 0; /* night silhouettes */
   --ui-text: #123a6b;  /* labels / controls / footer */
   --title-color: #0b2a5e;
   --title-glow: rgba(255, 255, 255, 0.85);
@@ -36,7 +39,7 @@ body {
 }
 
 /* ============================================================
-   Layered sky: day base + sunset/twilight/night overlays
+   Sky: bright day base, deep-space overlay, clouds, silhouettes
    ============================================================ */
 
 .sky {
@@ -46,47 +49,40 @@ body {
   pointer-events: none;
 }
 
-.sky-day,
-.sky-sunset,
-.sky-twilight,
-.sky-night,
-.sky-haze,
+.sky-space,
+.milkyway,
 .sky-vignette {
   position: absolute;
   inset: 0;
 }
 
-.sky-sunset {
-  background: linear-gradient(180deg, #4a6fc0 0%, #8a6fae 30%, #ff9e6d 60%, #ffd9a8 100%);
-  opacity: var(--sunset);
+.sky-space {
+  background: linear-gradient(180deg, #030410 0%, #070b1c 40%, #050814 75%, #01030a 100%);
+  opacity: var(--space);
 }
 
-.sky-twilight {
-  background: linear-gradient(180deg, #131d3d 0%, #2c2357 45%, #5a4a85 75%, #8d6aae 100%);
-  opacity: var(--twilight);
-}
-
-.sky-night {
-  background: linear-gradient(180deg, #04060f 0%, #0a1024 45%, #101a38 78%, #00040c 100%);
-  opacity: var(--night);
-}
-
-.sky-haze {
-  background: linear-gradient(180deg, transparent 55%, rgba(255, 180, 120, 0.18) 80%, rgba(255, 220, 170, 0.3) 100%);
-  opacity: calc(var(--sunset) * 0.8);
+/* Soft Milky Way band, dim enough to sit behind the starfield. */
+.milkyway {
+  inset: -20%;
+  filter: blur(2px);
+  opacity: var(--space);
+  background:
+    radial-gradient(ellipse at 30% 30%, rgba(140, 160, 220, 0.14), transparent 50%),
+    radial-gradient(ellipse at 72% 62%, rgba(120, 90, 180, 0.12), transparent 55%),
+    radial-gradient(ellipse at 50% 40%, rgba(200, 215, 255, 0.10), transparent 60%);
 }
 
 .sky-vignette {
   background: radial-gradient(120% 120% at 50% 45%, transparent 55%, rgba(0, 0, 0, 0.28) 100%);
 }
 
-/* ---------- Clouds (day, fade at night) ---------- */
+/* ---------- Clouds (fade out in deep space) ---------- */
 
 .cloud {
   position: absolute;
   width: 130px;
   height: 42px;
-  background: var(--cloud-bg);
+  background: rgba(255, 255, 255, 0.92);
   border-radius: 42px;
   filter: blur(1px);
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
@@ -125,7 +121,7 @@ body {
   to   { left: 112vw; }
 }
 
-/* ---------- Silhouettes: subtle dark shapes, never competing ---------- */
+/* ---------- Silhouettes: subtle dark shapes, fade out in deep space ---------- */
 
 .silhouette {
   position: absolute;
@@ -158,39 +154,9 @@ body {
   animation-delay: -80s;
 }
 
-.sil-rocket {
-  width: 11px;
-  height: 36px;
-  left: 58%;
-  bottom: -8%;
-  background: linear-gradient(to bottom, #2c3a58, #10192e);
-  clip-path: polygon(50% 0, 100% 100%, 0 100%);
-  opacity: calc(var(--nightlife-fade) * 0.55);
-  animation-name: rocketUp;
-  animation-duration: 16s;
-  animation-delay: -7s;
-}
-
-.sil-rocket::after {
-  content: "";
-  position: absolute;
-  left: 50%;
-  top: 100%;
-  width: 4px;
-  height: 22px;
-  transform: translateX(-50%);
-  border-radius: 50%;
-  background: linear-gradient(to bottom, rgba(255, 200, 120, 0.8), transparent);
-}
-
 @keyframes driftAcross {
   from { left: -12vw; }
   to   { left: 114vw; }
-}
-
-@keyframes rocketUp {
-  from { transform: translateY(0); }
-  to   { transform: translateY(-112vh); }
 }
 
 /* ============================================================
@@ -246,7 +212,7 @@ body {
 .nebula {
   position: absolute;
   inset: 0;
-  opacity: calc(var(--night) * 0.55);
+  opacity: calc(var(--space) * 0.55);
   background:
     radial-gradient(40% 30% at 20% 25%, rgba(90, 70, 160, 0.35), transparent 70%),
     radial-gradient(35% 28% at 78% 60%, rgba(40, 80, 140, 0.3), transparent 70%),
@@ -262,7 +228,7 @@ body {
   border-radius: 50%;
   background: radial-gradient(ellipse, rgba(200, 220, 255, 0.35), rgba(160, 180, 230, 0.12) 40%, transparent 70%);
   transform: rotate(-18deg);
-  opacity: calc(var(--night) * 0.5);
+  opacity: calc(var(--space) * 0.5);
 }
 
 /* ============================================================
@@ -297,7 +263,7 @@ body {
 
 body.orbits-on .orbits { opacity: 1; }
 
-/* ---------- Sun: corona, granulated disc, eclipse anchor ---------- */
+/* ---------- Sun: corona, flares, granulated disc, remnant, light front ---------- */
 
 .sun {
   position: absolute;
@@ -309,12 +275,38 @@ body.orbits-on .orbits { opacity: 1; }
   cursor: pointer;
   pointer-events: auto;
   border-radius: 50%;
+  outline: none;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
 }
 
-.sun-body {
+.sun:focus-visible {
+  outline: 2px solid rgba(255, 217, 120, 0.9);
+  outline-offset: 6px;
+}
+
+.sun-flares {
   position: absolute;
-  inset: 0;
-  transform: translateY(var(--sun-sink));
+  left: 50%;
+  top: 50%;
+  width: 230%;
+  height: 230%;
+  margin: -115% 0 0 -115%;
+  border-radius: 50%;
+  background: radial-gradient(circle,
+    transparent 38%,
+    rgba(255, 165, 60, 0.5) 54%,
+    rgba(255, 120, 40, 0.22) 62%,
+    transparent 70%);
+  mix-blend-mode: screen;
+  opacity: calc(var(--sun-live) * var(--turb) * 0.9);
+  animation: flareSpin 1.6s ease-in-out infinite;
+  pointer-events: none;
+}
+
+@keyframes flareSpin {
+  0%, 100% { transform: scale(1) rotate(0deg); }
+  50%      { transform: scale(1.14) rotate(14deg); }
 }
 
 .sun-corona {
@@ -326,8 +318,10 @@ body.orbits-on .orbits { opacity: 1; }
   margin: -120% 0 0 -120%;
   border-radius: 50%;
   background: radial-gradient(circle, rgba(255, 220, 120, 0.5), rgba(255, 170, 60, 0.16) 40%, transparent 70%);
-  opacity: calc(var(--sun-fade) * 0.85);
+  opacity: calc(var(--sun-live) * 0.85);
+  transform: scale(var(--pulse-s));
   animation: coronaPulse 7s ease-in-out infinite;
+  pointer-events: none;
 }
 
 .sun-disc {
@@ -335,8 +329,10 @@ body.orbits-on .orbits { opacity: 1; }
   inset: 0;
   border-radius: 50%;
   background: radial-gradient(circle at 50% 48%, var(--sun-a), var(--sun-b) 42%, var(--sun-c) 74%, var(--sun-d) 100%);
-  box-shadow: 0 0 40px 18px rgba(255, 214, 60, 0.55), 0 0 120px 60px rgba(255, 180, 50, 0.28);
-  opacity: var(--sun-fade);
+  box-shadow: 0 0 40px 18px rgba(255, 214, 60, calc(var(--sun-live) * 0.55)),
+              0 0 120px 60px rgba(255, 180, 50, calc(var(--sun-live) * 0.28));
+  opacity: var(--sun-live);
+  pointer-events: none;
 }
 
 /* Granulation: slow rolling cell texture on the photosphere. */
@@ -350,30 +346,50 @@ body.orbits-on .orbits { opacity: 1; }
     rgba(255, 140, 30, 0.35) 7px 13px,
     rgba(255, 245, 180, 0.5) 13px 19px);
   mix-blend-mode: screen;
-  opacity: 0.5;
+  opacity: calc(var(--boil) * 0.5);
   animation: boil 8s ease-in-out infinite;
 }
 
 @keyframes boil {
-  0%, 100% { transform: scale(1) rotate(0deg); opacity: 0.45; }
-  50%      { transform: scale(1.06) rotate(8deg); opacity: 0.7; }
+  0%, 100% { transform: scale(1) rotate(0deg); opacity: calc(var(--boil) * 0.45); }
+  50%      { transform: scale(1.06) rotate(8deg); opacity: calc(var(--boil) * 0.7); }
 }
 
 @keyframes coronaPulse {
-  0%, 100% { transform: scale(1); }
-  50%      { transform: scale(1.06); }
+  0%, 100% { transform: scale(var(--pulse-s)); }
+  50%      { transform: scale(calc(var(--pulse-s) * 1.06)); }
 }
 
-/* At night the sun goes dark but keeps a faint eclipse disc so the
-   day/night toggle stays clickable. */
-.sun-eclipse {
+/* Faint dashed ring left behind so the sun spot stays clickable. */
+.sun-remnant {
   position: absolute;
-  inset: 0;
-  z-index: 2;
+  left: 50%;
+  top: 50%;
+  width: 120%;
+  height: 120%;
+  margin: -60% 0 0 -60%;
   border-radius: 50%;
-  background: radial-gradient(circle at 50% 50%, #0a0f1e 0%, #05070f 60%, #0b1226 100%);
-  box-shadow: inset 0 0 26px rgba(160, 190, 255, 0.18), 0 0 34px 8px rgba(120, 150, 255, 0.1);
-  opacity: var(--eclipse);
+  border: 1px dashed rgba(255, 180, 120, 0.7);
+  background: radial-gradient(circle, rgba(255, 160, 90, 0.18), transparent 60%);
+  box-shadow: 0 0 24px rgba(255, 140, 60, 0.35), inset 0 0 18px rgba(255, 150, 70, 0.25);
+  opacity: var(--remnant);
+  pointer-events: none;
+}
+
+/* Expanding ring marking the last photons on their way out. */
+.light-front {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 60px;
+  height: 60px;
+  margin: -30px 0 0 -30px;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 220, 160, 0.9);
+  box-shadow: 0 0 18px rgba(255, 200, 120, 0.6);
+  transform: scale(var(--lf-s));
+  opacity: var(--lf-o);
+  pointer-events: none;
 }
 
 /* ---------- Planets ---------- */
@@ -391,14 +407,15 @@ body.orbits-on .orbits { opacity: 1; }
 }
 
 /* Spherical lighting: a shading overlay rotated toward the sun.
-   Light comes from the sun-facing side; the dark side holds a soft
-   terminator instead of going pure black. */
+   Its strength fades as solar illumination drops, leaving each world
+   dark but still holding its own colour. */
 .planet::before {
   content: "";
   position: absolute;
   inset: -1px;
   border-radius: 50%;
   transform: rotate(var(--face, 0deg));
+  opacity: var(--face-op);
   background:
     radial-gradient(circle at 66% 44%, rgba(255, 255, 255, 0.42) 0%, rgba(255, 255, 255, 0) 24%),
     linear-gradient(90deg,
@@ -587,7 +604,7 @@ body.orbits-on .orbits { opacity: 1; }
 body.labels-on .plabel { opacity: 0.85; }
 
 /* ============================================================
-   Header / controls / footer / tooltip
+   Header / controls / status / disclaimer / footer / tooltip
    ============================================================ */
 
 .header {
@@ -656,14 +673,89 @@ body.labels-on .plabel { opacity: 0.85; }
   transition: background 0.25s ease, color 0.25s ease, box-shadow 0.25s ease;
 }
 
-.ctl:hover {
+.ctl:hover:not(:disabled) {
   background: rgba(255, 255, 255, 0.25);
+}
+
+.ctl:disabled {
+  opacity: 0.55;
+  cursor: default;
 }
 
 .ctl.active {
   background: rgba(255, 255, 255, 0.85);
   color: #0b2a5e;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.18);
+}
+
+/* Scientific status readout (bottom-left). */
+.status {
+  position: fixed;
+  left: 16px;
+  bottom: 16px;
+  z-index: 30;
+  max-width: 270px;
+  padding: 12px 16px;
+  border-radius: 14px;
+  background: rgba(12, 18, 38, 0.45);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  color: #eaf0ff;
+  pointer-events: none;
+}
+
+.status-title {
+  font-size: 0.66rem;
+  font-weight: 700;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  margin-bottom: 6px;
+  color: #ffd98f;
+}
+
+.status-lines {
+  font-size: 0.62rem;
+  line-height: 1.55;
+  letter-spacing: 0.05em;
+  opacity: 0.9;
+}
+
+.status-count {
+  display: none;
+  margin-top: 8px;
+}
+
+body.count-on .status-count { display: block; }
+
+.status-bar {
+  height: 3px;
+  border-radius: 3px;
+  background: rgba(255, 255, 255, 0.2);
+  overflow: hidden;
+}
+
+.status-bar-fill {
+  display: block;
+  height: 100%;
+  width: calc(var(--delay) * 100%);
+  border-radius: 3px;
+  background: linear-gradient(90deg, #ffd98f, #ff9f1a);
+}
+
+.disclaimer {
+  position: fixed;
+  right: 16px;
+  bottom: 16px;
+  z-index: 30;
+  max-width: 300px;
+  font-size: 0.56rem;
+  line-height: 1.5;
+  letter-spacing: 0.04em;
+  color: var(--ui-text);
+  opacity: 0.65;
+  text-align: right;
+  pointer-events: none;
 }
 
 .footer {
@@ -744,6 +836,10 @@ body.labels-on .plabel { opacity: 0.85; }
 
   .galaxy { width: 260px; height: 100px; }
 
+  .status { left: 10px; bottom: 10px; max-width: 200px; }
+
+  .disclaimer { right: 10px; bottom: 10px; max-width: 200px; font-size: 0.5rem; }
+
   .footer { max-width: calc(100vw - 20px); font-size: 0.52rem; }
 }
 
@@ -757,6 +853,7 @@ body.labels-on .plabel { opacity: 0.85; }
   .stars .pts,
   .sun-corona,
   .sun-disc::before,
+  .sun-flares,
   .nebula,
   .galaxy {
     animation: none;
@@ -769,5 +866,6 @@ body.labels-on .plabel { opacity: 0.85; }
 
   .plabel,
   .orbits,
-  .tooltip { transition: none; }
+  .tooltip,
+  .light-front { transition: none; }
 }
