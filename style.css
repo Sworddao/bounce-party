@@ -268,24 +268,119 @@ body {
   to   { left: 110vw; }
 }
 
+/* ---------- Birds (day sky) ----------
+   3D soaring birds seen from above: a shaded body with swept, feathered
+   wings that slowly flap, a head with a beak, and tail feathers. */
+
 .bird {
   position: absolute;
-  font-size: 2rem;
-  animation: fly linear infinite;
-  filter: drop-shadow(0 3px 3px rgba(0, 0, 0, 0.2));
+  width: 116px;
+  height: 48px;
+  animation: fly ease-in-out infinite;
   opacity: var(--bird-fade);
+  filter: drop-shadow(0 4px 5px rgba(0, 0, 0, 0.28));
 }
 
-.bird-1 { top: 18%; animation-duration: 18s; animation-delay: -5s; }
-.bird-2 { top: 30%; animation-duration: 24s; animation-delay: -13s; }
-.bird-3 { top: 10%; animation-duration: 30s; animation-delay: -2s; }
+/* Fuselage: softly shaded capsule (lighter back, darker belly). */
+.bird-body {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 60px;
+  height: 15px;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  background: linear-gradient(to bottom, #f7fafc, #c9d5e1 58%, #8fa2b5);
+  box-shadow: inset 0 -2px 3px rgba(40, 60, 90, 0.4), inset 0 2px 2px rgba(255, 255, 255, 0.7);
+}
+
+/* Small beak on the head. */
+.bird-body::after {
+  content: "";
+  position: absolute;
+  left: -5px;
+  top: 50%;
+  width: 9px;
+  height: 3px;
+  transform: translateY(-50%);
+  clip-path: polygon(0 0, 100% 50%, 0 100%);
+  background: linear-gradient(to bottom, #f3e3a0, #c9a94f);
+}
+
+/* Swept wings: long rounded bars anchored at the shoulder. */
+.bird-wing {
+  position: absolute;
+  left: 24px;
+  width: 58px;
+  height: 12px;
+  border-radius: 50%;
+  background: linear-gradient(to bottom, #ffffff, #bcc9d7 55%, #8497ab);
+  box-shadow: inset 0 -2px 3px rgba(40, 60, 90, 0.35), inset 0 1px 2px rgba(255, 255, 255, 0.8);
+  transform-origin: 8% 50%;
+}
+
+.bird-wing-a {
+  top: 10px;
+  animation: flapA 1.6s ease-in-out infinite;
+}
+
+.bird-wing-b {
+  top: 26px;
+  animation: flapB 1.6s ease-in-out infinite;
+}
+
+/* Tail feathers. */
+.bird-tail {
+  position: absolute;
+  right: 2px;
+  top: 50%;
+  width: 13px;
+  height: 7px;
+  transform: translateY(-50%);
+  clip-path: polygon(0 0, 100% 50%, 0 100%);
+  background: linear-gradient(to bottom, #f7fafc, #8fa2b5);
+}
+
+/* A darker, sleeker swift for variety. */
+.bird-dark .bird-body {
+  background: linear-gradient(to bottom, #4a5872, #2a3246 60%, #161c2b);
+  box-shadow: inset 0 -2px 3px rgba(0, 0, 0, 0.5);
+}
+
+.bird-dark .bird-body::after {
+  background: linear-gradient(to bottom, #d8c96a, #8f7a2e);
+}
+
+.bird-dark .bird-wing {
+  background: linear-gradient(to bottom, #3d4a63, #232b3d 55%, #10151f);
+  box-shadow: inset 0 -2px 3px rgba(0, 0, 0, 0.5);
+}
+
+.bird-dark .bird-tail {
+  background: linear-gradient(to bottom, #3d4a63, #10151f);
+}
+
+.bird-1 { top: 16%; animation-duration: 20s; animation-delay: -5s; }
+.bird-2 { top: 30%; animation-duration: 26s; animation-delay: -13s; }
+.bird-3 { top: 9%;  animation-duration: 16s; animation-delay: -2s; }
 
 @keyframes fly {
-  from { left: -10vw; }
-  25%  { transform: translateY(-16px); }
-  50%  { transform: translateY(0); }
-  75%  { transform: translateY(-16px); }
-  to   { left: 110vw; }
+  from { left: -14vw; }
+  25%  { transform: translateY(-12px) rotate(2deg); }
+  50%  { transform: translateY(0) rotate(-1deg); }
+  75%  { transform: translateY(-12px) rotate(2deg); }
+  to   { left: 114vw; }
+}
+
+/* Slow, graceful wingbeats (raise / lower together). */
+@keyframes flapA {
+  0%, 100% { transform: rotate(-38deg); }
+  50%      { transform: rotate(-10deg); }
+}
+
+@keyframes flapB {
+  0%, 100% { transform: rotate(38deg); }
+  50%      { transform: rotate(10deg); }
 }
 
 .owl {
@@ -326,36 +421,125 @@ body {
 /* ---------- Aeroplanes (day sky) ----------
    Real technique: straight-and-level cruise at constant speed, with a
    gentle bank and slight altitude changes. High/far planes look smaller
-   and slower; traffic flies in both directions. */
+   and slower; traffic flies in both directions.
+   3D airliner: shaded fuselage with a window band and cockpit, swept
+   tail fin and tailplane, a near wing with engine pod, and a blinking
+   red anti-collision beacon on the wingtip. */
 
 .plane {
   position: absolute;
+  width: 156px;
+  height: 44px;
   animation: planeFly ease-in-out infinite;
   opacity: var(--bird-fade);
-  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.18));
+  filter: drop-shadow(0 5px 7px rgba(25, 35, 55, 0.35));
 }
 
 .plane-1 {
   top: 18%;
-  font-size: 1.6rem;
+  --pscale: 0.62;
   animation-duration: 46s;
   animation-delay: -9s;
 }
 
 .plane-2 {
   top: 34%;
-  font-size: 2.4rem;
+  --pscale: 1;
   animation-duration: 36s;
   animation-delay: -22s;
   animation-name: planeFlyBack;
 }
 
-/* Glowing anti-collision beacon on the fuselage. */
+/* Fuselage: a capsule shaded like a cylinder, with a window band. */
+.plane-fuselage {
+  position: absolute;
+  left: 8px;
+  top: 50%;
+  width: 136px;
+  height: 13px;
+  transform: translateY(-50%);
+  border-radius: 50% 6px 6px 50%;
+  background: linear-gradient(to bottom, #ffffff, #e2eaf1 50%, #a9b7c6);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.28), inset 0 -2px 3px rgba(55, 75, 100, 0.35), inset 0 2px 2px rgba(255, 255, 255, 0.9);
+}
+
+/* Passenger window band. */
+.plane-fuselage::before {
+  content: "";
+  position: absolute;
+  inset: 2px 16px 2px 26px;
+  border-radius: 50%;
+  background: repeating-linear-gradient(to right, rgba(45, 75, 115, 0.55) 0 2px, transparent 2px 7px);
+  opacity: 0.65;
+}
+
+/* Cockpit windows. */
+.plane-fuselage::after {
+  content: "";
+  position: absolute;
+  left: 5px;
+  top: 2px;
+  width: 15px;
+  height: 8px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 40% 35%, #cfe3ff, #54789f 65%, #314d6e);
+  box-shadow: inset 0 -2px 3px rgba(0, 0, 0, 0.45);
+}
+
+/* Swept vertical tail fin. */
+.plane-tailfin {
+  position: absolute;
+  left: 118px;
+  top: 6px;
+  width: 24px;
+  height: 20px;
+  clip-path: polygon(0 100%, 100% 100%, 40% 0);
+  background: linear-gradient(to right, #aebccb, #ffffff 55%, #8fa1b3);
+  box-shadow: inset -2px 0 3px rgba(55, 75, 100, 0.35);
+}
+
+/* Horizontal stabiliser. */
+.plane-tailplane {
+  position: absolute;
+  left: 122px;
+  top: 50%;
+  width: 22px;
+  height: 4px;
+  transform: translateY(-50%);
+  border-radius: 50%;
+  background: linear-gradient(to bottom, #ffffff, #94a6b8);
+}
+
+/* Near wing: swept, descending below the fuselage. */
+.plane-wing {
+  position: absolute;
+  left: 46px;
+  top: 18px;
+  width: 68px;
+  height: 17px;
+  clip-path: polygon(8% 0%, 97% 0%, 100% 100%, 0% 52%);
+  background: linear-gradient(to bottom, #f2f6fa, #b6c4d2 58%, #7e91a4);
+  box-shadow: 0 2px 3px rgba(0, 0, 0, 0.22);
+}
+
+/* Engine pod under the wing. */
+.plane-engine {
+  position: absolute;
+  left: 76px;
+  top: 33px;
+  width: 19px;
+  height: 9px;
+  border-radius: 50%;
+  background: linear-gradient(to bottom, #e8eff5, #93a6b8);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+/* Blinking anti-collision beacon on the wingtip. */
 .plane::after {
   content: "";
   position: absolute;
-  top: 30%;
-  right: 18%;
+  left: 104px;
+  top: 26px;
   width: 6px;
   height: 6px;
   border-radius: 50%;
@@ -364,27 +548,22 @@ body {
   animation: beacon 1.4s steps(2, end) infinite;
 }
 
-.plane-2::after {
-  right: auto;
-  left: 18%;
-}
-
 @keyframes planeFly {
-  0%   { left: -14vw; transform: translateY(0) rotate(-2deg); }
-  20%  { transform: translateY(6px) rotate(0.5deg); }
-  40%  { transform: translateY(-4px) rotate(-1.5deg); }
-  60%  { transform: translateY(7px) rotate(1deg); }
-  80%  { transform: translateY(-5px) rotate(-1deg); }
-  100% { left: 114vw; transform: translateY(0) rotate(-2deg); }
+  0%   { left: -14vw; transform: translateY(0) rotate(-2deg) scale(var(--pscale, 1)); }
+  20%  { transform: translateY(6px) rotate(0.5deg) scale(var(--pscale, 1)); }
+  40%  { transform: translateY(-4px) rotate(-1.5deg) scale(var(--pscale, 1)); }
+  60%  { transform: translateY(7px) rotate(1deg) scale(var(--pscale, 1)); }
+  80%  { transform: translateY(-5px) rotate(-1deg) scale(var(--pscale, 1)); }
+  100% { left: 114vw; transform: translateY(0) rotate(-2deg) scale(var(--pscale, 1)); }
 }
 
 @keyframes planeFlyBack {
-  0%   { left: 114vw; transform: translateY(0) rotate(2deg) scaleX(-1); }
-  20%  { transform: translateY(-6px) rotate(-0.5deg) scaleX(-1); }
-  40%  { transform: translateY(4px) rotate(1.5deg) scaleX(-1); }
-  60%  { transform: translateY(-7px) rotate(-1deg) scaleX(-1); }
-  80%  { transform: translateY(5px) rotate(1deg) scaleX(-1); }
-  100% { left: -14vw; transform: translateY(0) rotate(2deg) scaleX(-1); }
+  0%   { left: 114vw; transform: translateY(0) rotate(2deg) scaleX(-1) scale(var(--pscale, 1)); }
+  20%  { transform: translateY(-6px) rotate(-0.5deg) scaleX(-1) scale(var(--pscale, 1)); }
+  40%  { transform: translateY(4px) rotate(1.5deg) scaleX(-1) scale(var(--pscale, 1)); }
+  60%  { transform: translateY(-7px) rotate(-1deg) scaleX(-1) scale(var(--pscale, 1)); }
+  80%  { transform: translateY(5px) rotate(1deg) scaleX(-1) scale(var(--pscale, 1)); }
+  100% { left: -14vw; transform: translateY(0) rotate(2deg) scaleX(-1) scale(var(--pscale, 1)); }
 }
 
 /* Blinking anti-collision beacon. */
@@ -396,30 +575,91 @@ body {
 /* ---------- Rockets (night sky) ----------
    Real technique: a vertical launch. The rocket points nose-up and
    accelerates straight up, with a bright flame and a long glowing
-   exhaust trail streaming beneath its tail. */
+   exhaust trail streaming beneath its tail.
+   3D rocket: shaded nose cone, metallic cylindrical body, round window,
+   swept side fins, and a flickering flame core. */
 
 .rocket {
   position: absolute;
-  bottom: -90px;
-  font-size: 2rem;
+  bottom: -100px;
+  width: 36px;
+  height: 108px;
   opacity: var(--nightlife-fade);
-  filter: drop-shadow(0 0 10px rgba(255, 170, 80, 0.6));
+  filter: drop-shadow(0 0 12px rgba(255, 170, 80, 0.6));
   animation: rocketLaunch ease-in infinite;
-  transform: rotate(-45deg); /* nose points straight up */
 }
 
 .rocket-1 { left: 26%; animation-duration: 7s; animation-delay: -1.5s; }
 .rocket-2 { left: 58%; animation-duration: 9s; animation-delay: -5s; }
 
+/* Nose cone. */
+.rocket-nose {
+  position: absolute;
+  left: 50%;
+  top: 0;
+  width: 24px;
+  height: 22px;
+  transform: translateX(-50%);
+  clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
+  background: linear-gradient(to bottom, #ffffff, #c6d0db 70%, #9aa9ba);
+  box-shadow: inset 2px 0 3px rgba(255, 255, 255, 0.8), inset -2px 0 3px rgba(55, 75, 100, 0.4);
+}
+
+/* Cylindrical body with metallic shading. */
+.rocket-body {
+  position: absolute;
+  left: 50%;
+  top: 20px;
+  width: 26px;
+  height: 66px;
+  transform: translateX(-50%);
+  border-radius: 9px 9px 5px 5px;
+  background: linear-gradient(to right, #a5b2c1, #ffffff 36%, #e6edf3 52%, #8c9cac);
+  box-shadow: inset 0 -3px 4px rgba(40, 60, 90, 0.3);
+}
+
+/* Round cabin window. */
+.rocket-window {
+  position: absolute;
+  left: 50%;
+  top: 30px;
+  width: 10px;
+  height: 10px;
+  transform: translateX(-50%);
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #d8ecff, #5c8dd6 60%, #274f9c);
+  box-shadow: inset 0 -2px 3px rgba(0, 0, 0, 0.45);
+}
+
+/* Swept side fins. */
+.rocket-fin {
+  position: absolute;
+  top: 76px;
+  width: 15px;
+  height: 20px;
+  background: linear-gradient(to bottom, #e05c68, #a02c38);
+}
+
+.rocket-fin-a {
+  left: 2px;
+  clip-path: polygon(100% 0%, 0% 100%, 100% 100%);
+}
+
+.rocket-fin-b {
+  right: 2px;
+  clip-path: polygon(0% 0%, 100% 100%, 0% 100%);
+  background: linear-gradient(to bottom, #e86874, #b23a46);
+}
+
 /* Bright flame core beneath the tail. */
 .rocket::after {
   content: "";
   position: absolute;
-  top: 74%;
+  top: 96px;
   left: 50%;
   width: 12px;
-  height: 38px;
-  margin-left: -6px;
+  height: 36px;
+  transform: translateX(-50%);
   border-radius: 50%;
   background: radial-gradient(ellipse at 50% 10%, #fff8e0, #ffd27a 45%, #ff8a2a 75%, transparent);
   box-shadow: 0 0 18px 7px rgba(255, 150, 60, 0.9);
@@ -430,11 +670,11 @@ body {
 .rocket::before {
   content: "";
   position: absolute;
-  top: 58%;
+  top: 88px;
   left: 50%;
   width: 18px;
   height: 160px;
-  margin-left: -9px;
+  transform: translateX(-50%);
   border-radius: 50%;
   background: linear-gradient(to bottom, rgba(255, 214, 140, 0.85), rgba(255, 140, 60, 0.25) 45%, transparent);
   filter: blur(1px);
@@ -442,8 +682,8 @@ body {
 }
 
 @keyframes rocketLaunch {
-  from { transform: translateY(0) rotate(-45deg); }
-  to   { transform: translateY(-118vh) rotate(-45deg); }
+  from { transform: translateY(0); }
+  to   { transform: translateY(-118vh); }
 }
 
 @keyframes flame {

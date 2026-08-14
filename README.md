@@ -11,7 +11,8 @@ A calm, cinematic solar system built with **HTML + CSS + a little JavaScript**.
   - Every change is a smooth, reversible cinematic sweep — never a snap
 - 🖱️ **Parallax:** planets drift slightly with your cursor; closer planets move more
 - 🦉 Night brings an owl and bats; birds head home at dusk
-- ✈️ Aeroplanes cruise the day sky with blinking anti-collision beacons; at night rockets launch vertically with glowing exhaust trails
+- ✈️ 3D aeroplanes cruise the day sky — shaded fuselage, swept wings, blinking anti-collision beacon on the wingtip; at night, 3D rockets launch vertically with glowing exhaust trails
+- 🕊️ 3D soaring birds with flapping wings share the day sky
 - ✨ Wiggling title and glowing planets
 - 👥 Footer credits: sworddao, demonx-sage, UjjenTamrakar & yashaswikarmacharya10-rgb
 
