@@ -7,86 +7,91 @@
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <div class="sky">
+
+  <!-- Layered sky: day base, sunset, twilight, night, haze, vignette -->
+  <div class="sky" aria-hidden="true">
     <div class="sky-day"></div>
     <div class="sky-sunset"></div>
     <div class="sky-twilight"></div>
     <div class="sky-night"></div>
-    <div class="starfield"></div>
+    <div class="sky-haze"></div>
+    <div class="sky-vignette"></div>
     <div class="cloud cloud-1"></div>
     <div class="cloud cloud-2"></div>
     <div class="cloud cloud-3"></div>
-    <div class="bird bird-1">
-      <div class="bird-wing bird-wing-a"></div>
-      <div class="bird-wing bird-wing-b"></div>
-      <div class="bird-body"></div>
-      <div class="bird-tail"></div>
-    </div>
-    <div class="bird bird-2">
-      <div class="bird-wing bird-wing-a"></div>
-      <div class="bird-wing bird-wing-b"></div>
-      <div class="bird-body"></div>
-      <div class="bird-tail"></div>
-    </div>
-    <div class="bird bird-3 bird-dark">
-      <div class="bird-wing bird-wing-a"></div>
-      <div class="bird-wing bird-wing-b"></div>
-      <div class="bird-body"></div>
-      <div class="bird-tail"></div>
-    </div>
-    <div class="owl">🦉</div>
-    <div class="bat bat-1">🦇</div>
-    <div class="bat bat-2">🦇</div>
-    <div class="bat bat-3">🦇</div>
-    <div class="plane plane-1">
-      <div class="plane-fuselage"></div>
-      <div class="plane-tailfin"></div>
-      <div class="plane-tailplane"></div>
-      <div class="plane-wing"></div>
-      <div class="plane-engine"></div>
-    </div>
-    <div class="plane plane-2">
-      <div class="plane-fuselage"></div>
-      <div class="plane-tailfin"></div>
-      <div class="plane-tailplane"></div>
-      <div class="plane-wing"></div>
-      <div class="plane-engine"></div>
-    </div>
-    <div class="rocket rocket-1">
-      <div class="rocket-nose"></div>
-      <div class="rocket-body"></div>
-      <div class="rocket-window"></div>
-      <div class="rocket-fin rocket-fin-a"></div>
-      <div class="rocket-fin rocket-fin-b"></div>
-    </div>
-    <div class="rocket rocket-2">
-      <div class="rocket-nose"></div>
-      <div class="rocket-body"></div>
-      <div class="rocket-window"></div>
-      <div class="rocket-fin rocket-fin-a"></div>
-      <div class="rocket-fin rocket-fin-b"></div>
-    </div>
+    <div class="silhouette sil-bird sil-bird-1"></div>
+    <div class="silhouette sil-bird sil-bird-2"></div>
+    <div class="silhouette sil-plane"></div>
+    <div class="silhouette sil-rocket"></div>
   </div>
 
-  <input type="checkbox" id="dark-toggle" hidden />
+  <!-- Starfield: generated star layers, nebula, galaxy -->
+  <div class="starfield" id="starfield" aria-hidden="true">
+    <div class="stars stars-far"><i class="pts"></i></div>
+    <div class="stars stars-mid"><i class="pts"></i></div>
+    <div class="stars stars-bright"><i class="pts"></i></div>
+    <div class="nebula"></div>
+    <div class="galaxy"></div>
+  </div>
 
-  <h1 class="title">🌌 Solar Gravity 🌌</h1>
+  <input type="checkbox" id="dark-toggle" hidden aria-hidden="true" />
 
-  <div class="planet p-mercury"></div>
-  <div class="planet p-venus"></div>
-  <div class="planet p-earth"></div>
-  <div class="planet p-mars"></div>
-  <div class="planet p-jupiter"></div>
-  <div class="planet p-saturn"></div>
-  <div class="planet p-uranus"></div>
-  <div class="planet p-neptune"></div>
+  <!-- The solar system: orbits, sun toggle, planets, rings, labels -->
+  <div class="world" id="world" aria-hidden="true">
+    <svg class="orbits" id="orbits">
+      <path></path><path></path><path></path><path></path>
+      <path></path><path></path><path></path><path></path>
+    </svg>
 
-  <label for="dark-toggle" class="sun" title="Toggle night mode">
-    <span class="sun-disc"></span>
-    <span class="moon"></span>
-  </label>
+    <label for="dark-toggle" class="sun" id="sun" title="Click to switch between day and night">
+      <span class="sun-body">
+        <span class="sun-corona"></span>
+        <span class="sun-disc"></span>
+        <span class="sun-eclipse"></span>
+      </span>
+    </label>
+
+    <div class="planet p-mercury"></div>
+    <div class="planet p-venus"></div>
+    <div class="planet p-earth"></div>
+    <div class="planet p-mars"></div>
+    <div class="planet p-jupiter"></div>
+    <div class="planet p-saturn"></div>
+    <div class="planet p-uranus"></div>
+    <div class="planet p-neptune"></div>
+
+    <div id="ring-back" class="saturn-ring ring-back"></div>
+    <div id="ring-front" class="saturn-ring ring-front"></div>
+
+    <div class="plabel" id="lab-mercury">Mercury</div>
+    <div class="plabel" id="lab-venus">Venus</div>
+    <div class="plabel" id="lab-earth">Earth</div>
+    <div class="plabel" id="lab-mars">Mars</div>
+    <div class="plabel" id="lab-jupiter">Jupiter</div>
+    <div class="plabel" id="lab-saturn">Saturn</div>
+    <div class="plabel" id="lab-uranus">Uranus</div>
+    <div class="plabel" id="lab-neptune">Neptune</div>
+  </div>
+
+  <header class="header">
+    <h1 class="title">Solar Gravity</h1>
+    <p class="subtitle">A miniature solar system in your browser</p>
+  </header>
+
+  <nav class="controls" id="controls" aria-label="Display controls">
+    <button type="button" id="ctl-daynight" class="ctl" aria-pressed="false">Night</button>
+    <button type="button" id="ctl-camera" class="ctl active" aria-pressed="true">Camera</button>
+    <button type="button" id="ctl-orbits" class="ctl" aria-pressed="false">Orbits</button>
+    <button type="button" id="ctl-labels" class="ctl" aria-pressed="false">Labels</button>
+    <button type="button" id="ctl-rotate" class="ctl" aria-pressed="false">Rotate</button>
+  </nav>
 
   <footer class="footer">Made by sworddao, demonx-sage, UjjenTamrakar &amp; yashaswikarmacharya10-rgb</footer>
+
+  <div id="tooltip" class="tooltip" role="tooltip" aria-hidden="true">
+    <div class="tooltip-name"></div>
+    <div class="tooltip-info"></div>
+  </div>
 
   <script src="script.js"></script>
 </body>

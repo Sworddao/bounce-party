@@ -5,234 +5,91 @@
 }
 
 :root {
-  --night: 0;       /* 0 = day, 1 = full night */
-  --sunset: 0;      /* peaks in the golden hour */
-  --twilight: 0;    /* peaks in blue hour */
-  --stars: 0;       /* starfield visibility */
-  --sun-sink: 0px;  /* sun moving toward horizon */
-  --sun-fade: 1;
-  --sun-bg: radial-gradient(circle, #fff8c0, #ffd93d 55%, #ff9f1a);
-  --moon-fade: 0;
-  --moon-rise: 120px;
+  --night: 0;          /* 0 = day, 1 = full night */
+  --sunset: 0;         /* peaks in the golden hour */
+  --twilight: 0;       /* peaks in the blue hour */
+  --stars: 0;          /* starfield visibility */
+  --sun-sink: 0px;     /* sun sinking toward the horizon */
+  --sun-fade: 1;       /* sun visibility */
+  --eclipse: 0;        /* dark eclipse disc over the sun at night */
+  --sun-a: #fffbe0;
+  --sun-b: #ffd93d;
+  --sun-c: #ff9f1a;
+  --sun-d: #e8670a;
   --cloud-bg: rgb(255, 255, 255);
   --cloud-fade: 1;
-  --bird-fade: 1;
-  --nightlife-fade: 0;
-  --planet-dim: 1;
-  --title-color: #1e3a8a;
-  --title-glow: rgba(255, 255, 255, 0.95);
+  --bird-fade: 1;      /* day silhouettes */
+  --nightlife-fade: 0; /* night silhouettes */
+  --ui-text: #123a6b;  /* labels / controls / footer */
+  --title-color: #0b2a5e;
+  --title-glow: rgba(255, 255, 255, 0.85);
+  --orbit-c: #4a5f96;  /* orbit line color */
 }
 
 body {
   min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: flex-start;
-  gap: 16px;
-  padding-top: 5vh;
-  font-family: "Comic Sans MS", "Segoe UI", sans-serif;
-  color: var(--title-color);
+  font-family: "Inter", "Segoe UI", system-ui, -apple-system, sans-serif;
   overflow: hidden;
-  background: #7fc4f2;
+  background: linear-gradient(180deg, #3fa9f5 0%, #7cc4f2 40%, #bfe6ff 75%, #eaf7ff 100%);
+  color: var(--ui-text);
+  touch-action: manipulation;
 }
+
+/* ============================================================
+   Layered sky: day base + sunset/twilight/night overlays
+   ============================================================ */
 
 .sky {
   position: fixed;
   inset: 0;
-  z-index: -1;
+  z-index: 0;
   pointer-events: none;
 }
-
-/* ---------- Layered sky (day -> sunset -> twilight -> night) ---------- */
 
 .sky-day,
 .sky-sunset,
 .sky-twilight,
 .sky-night,
-.starfield {
+.sky-haze,
+.sky-vignette {
   position: absolute;
   inset: 0;
 }
 
-.sky-day {
-  background: linear-gradient(180deg, #4fb3ff 0%, #87ceeb 45%, #c9ecff 75%, #e6f7ff 100%);
-  opacity: calc(1 - var(--night));
-}
-
 .sky-sunset {
-  background: linear-gradient(180deg, #5b8ed6 0%, #b58fcb 35%, #ff9e6d 62%, #ffd9a8 100%);
+  background: linear-gradient(180deg, #4a6fc0 0%, #8a6fae 30%, #ff9e6d 60%, #ffd9a8 100%);
   opacity: var(--sunset);
 }
 
 .sky-twilight {
-  background: linear-gradient(180deg, #1e2a4a 0%, #3a2e63 40%, #6b4f8f 70%, #8d6aae 100%);
+  background: linear-gradient(180deg, #131d3d 0%, #2c2357 45%, #5a4a85 75%, #8d6aae 100%);
   opacity: var(--twilight);
 }
 
 .sky-night {
-  background: linear-gradient(180deg, #060b1c 0%, #0f172a 45%, #1b2440 80%, #000814 100%);
+  background: linear-gradient(180deg, #04060f 0%, #0a1024 45%, #101a38 78%, #00040c 100%);
   opacity: var(--night);
 }
 
-/* ---------- Sun / Moon (the toggle) ---------- */
-
-.sun {
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  width: 150px;
-  height: 150px;
-  margin: -75px 0 0 -75px;
-  border-radius: 50%;
-  cursor: pointer;
-  z-index: 20;
+.sky-haze {
+  background: linear-gradient(180deg, transparent 55%, rgba(255, 180, 120, 0.18) 80%, rgba(255, 220, 170, 0.3) 100%);
+  opacity: calc(var(--sunset) * 0.8);
 }
 
-.sun-disc {
-  position: absolute;
-  inset: 0;
-  border-radius: 50%;
-  background: var(--sun-bg);
-  box-shadow: 0 0 40px 20px rgba(255, 214, 60, 0.6), 0 0 150px 70px rgba(255, 214, 60, 0.3);
-  animation: sunGlow 4s ease-in-out infinite;
-  transform: translateY(var(--sun-sink));
-  opacity: var(--sun-fade);
+.sky-vignette {
+  background: radial-gradient(120% 120% at 50% 45%, transparent 55%, rgba(0, 0, 0, 0.28) 100%);
 }
 
-@keyframes sunGlow {
-  0%, 100% { box-shadow: 0 0 40px 20px rgba(255, 214, 60, 0.6), 0 0 150px 70px rgba(255, 214, 60, 0.3); }
-  50%      { box-shadow: 0 0 60px 30px rgba(255, 214, 60, 0.85), 0 0 190px 90px rgba(255, 214, 60, 0.45); }
-}
-
-.moon {
-  position: absolute;
-  inset: 0;
-  border-radius: 50%;
-  background: radial-gradient(circle at 35% 35%, #f2f6ff, #c7d0e6 60%, #98a3bf);
-  box-shadow: 0 0 30px 12px rgba(220, 230, 255, 0.45), 0 0 110px 60px rgba(220, 230, 255, 0.18);
-  transform: translateY(var(--moon-rise));
-  opacity: var(--moon-fade);
-}
-
-.moon::before {
-  content: "";
-  position: absolute;
-  top: 24px;
-  left: 20px;
-  width: 16px;
-  height: 16px;
-  border-radius: 50%;
-  background: rgba(152, 163, 191, 0.55);
-  box-shadow: 30px 22px 0 -5px rgba(152, 163, 191, 0.5), 48px 6px 0 -7px rgba(152, 163, 191, 0.45), 12px 48px 0 -8px rgba(152, 163, 191, 0.4);
-}
-
-/* ---------- Planets ---------- */
-
-.planet {
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  border-radius: 50%;
-  z-index: 5;
-  filter: brightness(var(--planet-dim));
-  will-change: transform, opacity;
-}
-
-.p-mercury {
-  width: 16px;
-  height: 16px;
-  margin: -8px 0 0 -8px;
-  background: radial-gradient(circle at 35% 35%, #dcdcdc, #8c8c8c);
-}
-.p-venus {
-  width: 24px;
-  height: 24px;
-  margin: -12px 0 0 -12px;
-  background: radial-gradient(circle at 35% 35%, #f7e6b4, #c89b4a);
-}
-.p-earth {
-  width: 28px;
-  height: 28px;
-  margin: -14px 0 0 -14px;
-  background: radial-gradient(circle at 35% 35%, #7cd47c, #2f7fd6 65%, #1b5ba8);
-}
-.p-mars {
-  width: 22px;
-  height: 22px;
-  margin: -11px 0 0 -11px;
-  background: radial-gradient(circle at 35% 35%, #f09a76, #c1442a);
-}
-.p-jupiter {
-  width: 50px;
-  height: 50px;
-  margin: -25px 0 0 -25px;
-  background: radial-gradient(circle at 50% 50%, #f2d4a8, #e3b98c 40%, #b97a4a);
-}
-.p-saturn {
-  width: 44px;
-  height: 44px;
-  margin: -22px 0 0 -22px;
-  background: radial-gradient(circle at 40% 40%, #f8eccb, #e6c98f 55%, #b99a5f);
-}
-.p-saturn::after {
-  content: "";
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 150%;
-  height: 45%;
-  margin: -22% 0 0 -75%;
-  border: 5px solid rgba(214, 190, 140, 0.8);
-  border-radius: 50%;
-  transform: rotate(-18deg);
-}
-.p-uranus {
-  width: 30px;
-  height: 30px;
-  margin: -15px 0 0 -15px;
-  background: radial-gradient(circle at 35% 35%, #b8f2f2, #57c2c2);
-}
-.p-neptune {
-  width: 28px;
-  height: 28px;
-  margin: -14px 0 0 -14px;
-  background: radial-gradient(circle at 35% 35%, #7fa8f2, #3d5fd1);
-}
-
-.planet::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  border-radius: 50%;
-  box-shadow: 0 0 8px rgba(255, 255, 255, 0.6);
-}
-
-/* ---------- Headings ---------- */
-
-.title {
-  font-size: 3rem;
-  color: var(--title-color);
-  text-shadow: 0 0 14px var(--title-glow), 2px 2px 0 rgba(0, 0, 0, 0.12);
-  animation: wiggle 2s ease-in-out infinite;
-  position: relative;
-  z-index: 10;
-}
-
-@keyframes wiggle {
-  0%, 100% { transform: rotate(-2deg); }
-  50%      { transform: rotate(2deg); }
-}
-
-/* ---------- Day sky decorations ---------- */
+/* ---------- Clouds (day, fade at night) ---------- */
 
 .cloud {
   position: absolute;
-  width: 120px;
-  height: 40px;
+  width: 130px;
+  height: 42px;
   background: var(--cloud-bg);
-  border-radius: 40px;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+  border-radius: 42px;
+  filter: blur(1px);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
   animation: cloudDrift linear infinite;
   opacity: var(--cloud-fade);
 }
@@ -246,491 +103,139 @@ body {
 }
 
 .cloud::before {
-  width: 50px;
-  height: 50px;
-  top: -25px;
-  left: 18px;
+  width: 54px;
+  height: 54px;
+  top: -27px;
+  left: 20px;
 }
 
 .cloud::after {
-  width: 70px;
-  height: 70px;
-  top: -35px;
+  width: 74px;
+  height: 74px;
+  top: -38px;
   right: 18px;
 }
 
-.cloud-1 { top: 15%; animation-duration: 40s; }
-.cloud-2 { top: 35%; animation-duration: 55s; animation-delay: -20s; transform: scale(0.8); }
-.cloud-3 { top: 55%; animation-duration: 70s; animation-delay: -45s; transform: scale(0.6); }
+.cloud-1 { top: 14%; animation-duration: 48s; }
+.cloud-2 { top: 32%; animation-duration: 64s; animation-delay: -22s; transform: scale(0.82); }
+.cloud-3 { top: 50%; animation-duration: 82s; animation-delay: -46s; transform: scale(0.62); }
 
 @keyframes cloudDrift {
-  from { left: -220px; }
-  to   { left: 110vw; }
+  from { left: -240px; }
+  to   { left: 112vw; }
 }
 
-/* ---------- Birds (day sky) ----------
-   3D soaring birds seen from above: a shaded body with swept, feathered
-   wings that slowly flap, a head with a beak, and tail feathers. */
+/* ---------- Silhouettes: subtle dark shapes, never competing ---------- */
 
-.bird {
+.silhouette {
   position: absolute;
-  width: 116px;
-  height: 48px;
-  animation: fly ease-in-out infinite;
-  opacity: var(--bird-fade);
-  filter: drop-shadow(0 4px 5px rgba(0, 0, 0, 0.28));
+  animation-duration: 90s;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
 }
 
-/* Fuselage: softly shaded capsule (lighter back, darker belly). */
-.bird-body {
-  position: absolute;
-  left: 50%;
-  top: 50%;
+.sil-bird {
+  width: 46px;
+  height: 16px;
+  background: #1c2b47;
+  clip-path: polygon(0 52%, 38% 38%, 56% 20%, 100% 50%, 56% 60%, 38% 52%);
+  opacity: calc(var(--bird-fade) * 0.5);
+  animation-name: driftAcross;
+}
+
+.sil-bird-1 { top: 12%; animation-duration: 70s; animation-delay: -18s; }
+.sil-bird-2 { top: 26%; animation-duration: 96s; animation-delay: -55s; transform: scale(0.7); }
+
+.sil-plane {
   width: 60px;
   height: 15px;
-  transform: translate(-50%, -50%);
-  border-radius: 50%;
-  background: linear-gradient(to bottom, #f7fafc, #c9d5e1 58%, #8fa2b5);
-  box-shadow: inset 0 -2px 3px rgba(40, 60, 90, 0.4), inset 0 2px 2px rgba(255, 255, 255, 0.7);
+  top: 20%;
+  background: #24334f;
+  clip-path: polygon(0 55%, 26% 55%, 42% 100%, 56% 100%, 42% 55%, 100% 42%, 42% 32%, 56% 0, 42% 0, 26% 32%, 0 32%);
+  opacity: calc(var(--bird-fade) * 0.4);
+  animation-name: driftAcross;
+  animation-duration: 130s;
+  animation-delay: -80s;
 }
 
-/* Small beak on the head. */
-.bird-body::after {
+.sil-rocket {
+  width: 11px;
+  height: 36px;
+  left: 58%;
+  bottom: -8%;
+  background: linear-gradient(to bottom, #2c3a58, #10192e);
+  clip-path: polygon(50% 0, 100% 100%, 0 100%);
+  opacity: calc(var(--nightlife-fade) * 0.55);
+  animation-name: rocketUp;
+  animation-duration: 16s;
+  animation-delay: -7s;
+}
+
+.sil-rocket::after {
   content: "";
   position: absolute;
-  left: -5px;
-  top: 50%;
-  width: 9px;
-  height: 3px;
-  transform: translateY(-50%);
-  clip-path: polygon(0 0, 100% 50%, 0 100%);
-  background: linear-gradient(to bottom, #f3e3a0, #c9a94f);
-}
-
-/* Swept wings: long rounded bars anchored at the shoulder. */
-.bird-wing {
-  position: absolute;
-  left: 24px;
-  width: 58px;
-  height: 12px;
+  left: 50%;
+  top: 100%;
+  width: 4px;
+  height: 22px;
+  transform: translateX(-50%);
   border-radius: 50%;
-  background: linear-gradient(to bottom, #ffffff, #bcc9d7 55%, #8497ab);
-  box-shadow: inset 0 -2px 3px rgba(40, 60, 90, 0.35), inset 0 1px 2px rgba(255, 255, 255, 0.8);
-  transform-origin: 8% 50%;
+  background: linear-gradient(to bottom, rgba(255, 200, 120, 0.8), transparent);
 }
 
-.bird-wing-a {
-  top: 10px;
-  animation: flapA 1.6s ease-in-out infinite;
-}
-
-.bird-wing-b {
-  top: 26px;
-  animation: flapB 1.6s ease-in-out infinite;
-}
-
-/* Tail feathers. */
-.bird-tail {
-  position: absolute;
-  right: 2px;
-  top: 50%;
-  width: 13px;
-  height: 7px;
-  transform: translateY(-50%);
-  clip-path: polygon(0 0, 100% 50%, 0 100%);
-  background: linear-gradient(to bottom, #f7fafc, #8fa2b5);
-}
-
-/* A darker, sleeker swift for variety. */
-.bird-dark .bird-body {
-  background: linear-gradient(to bottom, #4a5872, #2a3246 60%, #161c2b);
-  box-shadow: inset 0 -2px 3px rgba(0, 0, 0, 0.5);
-}
-
-.bird-dark .bird-body::after {
-  background: linear-gradient(to bottom, #d8c96a, #8f7a2e);
-}
-
-.bird-dark .bird-wing {
-  background: linear-gradient(to bottom, #3d4a63, #232b3d 55%, #10151f);
-  box-shadow: inset 0 -2px 3px rgba(0, 0, 0, 0.5);
-}
-
-.bird-dark .bird-tail {
-  background: linear-gradient(to bottom, #3d4a63, #10151f);
-}
-
-.bird-1 { top: 16%; animation-duration: 20s; animation-delay: -5s; }
-.bird-2 { top: 30%; animation-duration: 26s; animation-delay: -13s; }
-.bird-3 { top: 9%;  animation-duration: 16s; animation-delay: -2s; }
-
-@keyframes fly {
-  from { left: -14vw; }
-  25%  { transform: translateY(-12px) rotate(2deg); }
-  50%  { transform: translateY(0) rotate(-1deg); }
-  75%  { transform: translateY(-12px) rotate(2deg); }
+@keyframes driftAcross {
+  from { left: -12vw; }
   to   { left: 114vw; }
 }
 
-/* Slow, graceful wingbeats (raise / lower together). */
-@keyframes flapA {
-  0%, 100% { transform: rotate(-38deg); }
-  50%      { transform: rotate(-10deg); }
-}
-
-@keyframes flapB {
-  0%, 100% { transform: rotate(38deg); }
-  50%      { transform: rotate(10deg); }
-}
-
-.owl {
-  position: absolute;
-  bottom: 12%;
-  left: 8%;
-  font-size: 4rem;
-  opacity: var(--nightlife-fade);
-  filter: drop-shadow(0 0 14px rgba(220, 230, 255, 0.35));
-  animation: owlBob 3s ease-in-out infinite;
-}
-
-@keyframes owlBob {
-  0%, 100% { transform: rotate(-3deg); }
-  50%      { transform: rotate(3deg); }
-}
-
-.bat {
-  position: absolute;
-  font-size: 2.2rem;
-  opacity: var(--nightlife-fade);
-  animation: batFly linear infinite;
-  filter: drop-shadow(0 0 8px rgba(180, 200, 255, 0.4));
-}
-
-.bat-1 { top: 12%; animation-duration: 16s; animation-delay: -3s; }
-.bat-2 { top: 26%; animation-duration: 22s; animation-delay: -11s; }
-.bat-3 { top: 40%; animation-duration: 28s; animation-delay: -6s; }
-
-@keyframes batFly {
-  0%   { left: -12vw; transform: translateY(0) scaleX(1); }
-  25%  { transform: translateY(-22px) scaleX(1); }
-  50%  { transform: translateY(0) scaleX(-1); }
-  75%  { transform: translateY(-22px) scaleX(-1); }
-  100% { left: 112vw; transform: translateY(0) scaleX(-1); }
-}
-
-/* ---------- Aeroplanes (day sky) ----------
-   Real technique: straight-and-level cruise at constant speed, with a
-   gentle bank and slight altitude changes. High/far planes look smaller
-   and slower; traffic flies in both directions.
-   3D airliner: shaded fuselage with a window band and cockpit, swept
-   tail fin and tailplane, a near wing with engine pod, and a blinking
-   red anti-collision beacon on the wingtip. */
-
-.plane {
-  position: absolute;
-  width: 156px;
-  height: 44px;
-  animation: planeFly ease-in-out infinite;
-  opacity: var(--bird-fade);
-  filter: drop-shadow(0 5px 7px rgba(25, 35, 55, 0.35));
-}
-
-.plane-1 {
-  top: 18%;
-  --pscale: 0.62;
-  animation-duration: 46s;
-  animation-delay: -9s;
-}
-
-.plane-2 {
-  top: 34%;
-  --pscale: 1;
-  animation-duration: 36s;
-  animation-delay: -22s;
-  animation-name: planeFlyBack;
-}
-
-/* Fuselage: a capsule shaded like a cylinder, with a window band. */
-.plane-fuselage {
-  position: absolute;
-  left: 8px;
-  top: 50%;
-  width: 136px;
-  height: 13px;
-  transform: translateY(-50%);
-  border-radius: 50% 6px 6px 50%;
-  background: linear-gradient(to bottom, #ffffff, #e2eaf1 50%, #a9b7c6);
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.28), inset 0 -2px 3px rgba(55, 75, 100, 0.35), inset 0 2px 2px rgba(255, 255, 255, 0.9);
-}
-
-/* Passenger window band. */
-.plane-fuselage::before {
-  content: "";
-  position: absolute;
-  inset: 2px 16px 2px 26px;
-  border-radius: 50%;
-  background: repeating-linear-gradient(to right, rgba(45, 75, 115, 0.55) 0 2px, transparent 2px 7px);
-  opacity: 0.65;
-}
-
-/* Cockpit windows. */
-.plane-fuselage::after {
-  content: "";
-  position: absolute;
-  left: 5px;
-  top: 2px;
-  width: 15px;
-  height: 8px;
-  border-radius: 50%;
-  background: radial-gradient(circle at 40% 35%, #cfe3ff, #54789f 65%, #314d6e);
-  box-shadow: inset 0 -2px 3px rgba(0, 0, 0, 0.45);
-}
-
-/* Swept vertical tail fin. */
-.plane-tailfin {
-  position: absolute;
-  left: 118px;
-  top: 6px;
-  width: 24px;
-  height: 20px;
-  clip-path: polygon(0 100%, 100% 100%, 40% 0);
-  background: linear-gradient(to right, #aebccb, #ffffff 55%, #8fa1b3);
-  box-shadow: inset -2px 0 3px rgba(55, 75, 100, 0.35);
-}
-
-/* Horizontal stabiliser. */
-.plane-tailplane {
-  position: absolute;
-  left: 122px;
-  top: 50%;
-  width: 22px;
-  height: 4px;
-  transform: translateY(-50%);
-  border-radius: 50%;
-  background: linear-gradient(to bottom, #ffffff, #94a6b8);
-}
-
-/* Near wing: swept, descending below the fuselage. */
-.plane-wing {
-  position: absolute;
-  left: 46px;
-  top: 18px;
-  width: 68px;
-  height: 17px;
-  clip-path: polygon(8% 0%, 97% 0%, 100% 100%, 0% 52%);
-  background: linear-gradient(to bottom, #f2f6fa, #b6c4d2 58%, #7e91a4);
-  box-shadow: 0 2px 3px rgba(0, 0, 0, 0.22);
-}
-
-/* Engine pod under the wing. */
-.plane-engine {
-  position: absolute;
-  left: 76px;
-  top: 33px;
-  width: 19px;
-  height: 9px;
-  border-radius: 50%;
-  background: linear-gradient(to bottom, #e8eff5, #93a6b8);
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
-}
-
-/* Blinking anti-collision beacon on the wingtip. */
-.plane::after {
-  content: "";
-  position: absolute;
-  left: 104px;
-  top: 26px;
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: radial-gradient(circle, #ffd6d6, rgba(255, 60, 60, 0));
-  box-shadow: 0 0 9px 2px rgba(255, 80, 80, 0.95), 0 0 20px 7px rgba(255, 80, 80, 0.4);
-  animation: beacon 1.4s steps(2, end) infinite;
-}
-
-@keyframes planeFly {
-  0%   { left: -14vw; transform: translateY(0) rotate(-2deg) scale(var(--pscale, 1)); }
-  20%  { transform: translateY(6px) rotate(0.5deg) scale(var(--pscale, 1)); }
-  40%  { transform: translateY(-4px) rotate(-1.5deg) scale(var(--pscale, 1)); }
-  60%  { transform: translateY(7px) rotate(1deg) scale(var(--pscale, 1)); }
-  80%  { transform: translateY(-5px) rotate(-1deg) scale(var(--pscale, 1)); }
-  100% { left: 114vw; transform: translateY(0) rotate(-2deg) scale(var(--pscale, 1)); }
-}
-
-@keyframes planeFlyBack {
-  0%   { left: 114vw; transform: translateY(0) rotate(2deg) scaleX(-1) scale(var(--pscale, 1)); }
-  20%  { transform: translateY(-6px) rotate(-0.5deg) scaleX(-1) scale(var(--pscale, 1)); }
-  40%  { transform: translateY(4px) rotate(1.5deg) scaleX(-1) scale(var(--pscale, 1)); }
-  60%  { transform: translateY(-7px) rotate(-1deg) scaleX(-1) scale(var(--pscale, 1)); }
-  80%  { transform: translateY(5px) rotate(1deg) scaleX(-1) scale(var(--pscale, 1)); }
-  100% { left: -14vw; transform: translateY(0) rotate(2deg) scaleX(-1) scale(var(--pscale, 1)); }
-}
-
-/* Blinking anti-collision beacon. */
-@keyframes beacon {
-  0%, 55% { opacity: 0.15; }
-  65%, 100% { opacity: 1; }
-}
-
-/* ---------- Rockets (night sky) ----------
-   Real technique: a vertical launch. The rocket points nose-up and
-   accelerates straight up, with a bright flame and a long glowing
-   exhaust trail streaming beneath its tail.
-   3D rocket: shaded nose cone, metallic cylindrical body, round window,
-   swept side fins, and a flickering flame core. */
-
-.rocket {
-  position: absolute;
-  bottom: -100px;
-  width: 36px;
-  height: 108px;
-  opacity: var(--nightlife-fade);
-  filter: drop-shadow(0 0 12px rgba(255, 170, 80, 0.6));
-  animation: rocketLaunch ease-in infinite;
-}
-
-.rocket-1 { left: 26%; animation-duration: 7s; animation-delay: -1.5s; }
-.rocket-2 { left: 58%; animation-duration: 9s; animation-delay: -5s; }
-
-/* Nose cone. */
-.rocket-nose {
-  position: absolute;
-  left: 50%;
-  top: 0;
-  width: 24px;
-  height: 22px;
-  transform: translateX(-50%);
-  clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
-  background: linear-gradient(to bottom, #ffffff, #c6d0db 70%, #9aa9ba);
-  box-shadow: inset 2px 0 3px rgba(255, 255, 255, 0.8), inset -2px 0 3px rgba(55, 75, 100, 0.4);
-}
-
-/* Cylindrical body with metallic shading. */
-.rocket-body {
-  position: absolute;
-  left: 50%;
-  top: 20px;
-  width: 26px;
-  height: 66px;
-  transform: translateX(-50%);
-  border-radius: 9px 9px 5px 5px;
-  background: linear-gradient(to right, #a5b2c1, #ffffff 36%, #e6edf3 52%, #8c9cac);
-  box-shadow: inset 0 -3px 4px rgba(40, 60, 90, 0.3);
-}
-
-/* Round cabin window. */
-.rocket-window {
-  position: absolute;
-  left: 50%;
-  top: 30px;
-  width: 10px;
-  height: 10px;
-  transform: translateX(-50%);
-  border-radius: 50%;
-  background: radial-gradient(circle at 35% 30%, #d8ecff, #5c8dd6 60%, #274f9c);
-  box-shadow: inset 0 -2px 3px rgba(0, 0, 0, 0.45);
-}
-
-/* Swept side fins. */
-.rocket-fin {
-  position: absolute;
-  top: 76px;
-  width: 15px;
-  height: 20px;
-  background: linear-gradient(to bottom, #e05c68, #a02c38);
-}
-
-.rocket-fin-a {
-  left: 2px;
-  clip-path: polygon(100% 0%, 0% 100%, 100% 100%);
-}
-
-.rocket-fin-b {
-  right: 2px;
-  clip-path: polygon(0% 0%, 100% 100%, 0% 100%);
-  background: linear-gradient(to bottom, #e86874, #b23a46);
-}
-
-/* Bright flame core beneath the tail. */
-.rocket::after {
-  content: "";
-  position: absolute;
-  top: 96px;
-  left: 50%;
-  width: 12px;
-  height: 36px;
-  transform: translateX(-50%);
-  border-radius: 50%;
-  background: radial-gradient(ellipse at 50% 10%, #fff8e0, #ffd27a 45%, #ff8a2a 75%, transparent);
-  box-shadow: 0 0 18px 7px rgba(255, 150, 60, 0.9);
-  animation: flame 0.16s ease-in-out infinite alternate;
-}
-
-/* Long glowing exhaust trail stretching down behind the launch. */
-.rocket::before {
-  content: "";
-  position: absolute;
-  top: 88px;
-  left: 50%;
-  width: 18px;
-  height: 160px;
-  transform: translateX(-50%);
-  border-radius: 50%;
-  background: linear-gradient(to bottom, rgba(255, 214, 140, 0.85), rgba(255, 140, 60, 0.25) 45%, transparent);
-  filter: blur(1px);
-  animation: trailFlicker 0.22s ease-in-out infinite alternate;
-}
-
-@keyframes rocketLaunch {
+@keyframes rocketUp {
   from { transform: translateY(0); }
-  to   { transform: translateY(-118vh); }
+  to   { transform: translateY(-112vh); }
 }
 
-@keyframes flame {
-  from { opacity: 0.7; transform: scaleY(0.85); }
-  to   { opacity: 1; transform: scaleY(1.15); }
-}
-
-@keyframes trailFlicker {
-  from { opacity: 0.7; }
-  to   { opacity: 1; }
-}
-
-/* ---------- Starfield ---------- */
+/* ============================================================
+   Starfield
+   ============================================================ */
 
 .starfield {
-  opacity: var(--stars);
+  position: fixed;
+  inset: 0;
+  z-index: 1;
   pointer-events: none;
+  opacity: var(--stars);
 }
 
-.starfield::before,
-.starfield::after {
-  content: "";
+.stars {
   position: absolute;
   inset: 0;
-  animation: twinkle 3s ease-in-out infinite;
 }
 
-.starfield::before {
-  box-shadow:
-    20px 30px 0 0 #fff, 60px 90px 0 0 #fff, 110px 40px 0 0 #fff,
-    150px 120px 0 0 #fff, 200px 60px 0 0 #fff, 250px 150px 0 0 #fff,
-    300px 30px 0 0 #fff, 350px 100px 0 0 #fff, 400px 170px 0 0 #fff,
-    450px 50px 0 0 #fff, 500px 130px 0 0 #fff, 550px 20px 0 0 #fff,
-    600px 90px 0 0 #fff, 650px 160px 0 0 #fff, 700px 60px 0 0 #fff,
-    40px 200px 0 0 #fff, 120px 250px 0 0 #fff, 220px 220px 0 0 #fff,
-    330px 280px 0 0 #fff, 470px 240px 0 0 #fff, 580px 300px 0 0 #fff,
-    690px 230px 0 0 #fff, 180px 320px 0 0 #fff, 520px 340px 0 0 #fff;
+.stars .pts {
+  position: absolute;
+  top: 0;
+  left: 0;
+  border-radius: 50%;
+  background: transparent;
 }
 
-.starfield::after {
-  box-shadow:
-    35px 70px 0 0 #cfe3ff, 90px 180px 0 0 #cfe3ff, 170px 140px 0 0 #cfe3ff,
-    260px 90px 0 0 #cfe3ff, 380px 210px 0 0 #cfe3ff, 460px 140px 0 0 #cfe3ff,
-    540px 250px 0 0 #cfe3ff, 640px 120px 0 0 #cfe3ff, 90px 290px 0 0 #cfe3ff,
-    360px 320px 0 0 #cfe3ff, 620px 280px 0 0 #cfe3ff, 280px 180px 0 0 #cfe3ff;
-  animation-delay: 1.5s;
-  animation-duration: 4s;
+.stars-far .pts {
+  width: 1px;
+  height: 1px;
+  animation: twinkle 4.5s ease-in-out infinite;
+}
+
+.stars-mid .pts {
+  width: 2px;
+  height: 2px;
+  animation: twinkle 3.2s ease-in-out infinite;
+  animation-delay: 1.2s;
+}
+
+.stars-bright .pts {
+  width: 2px;
+  height: 2px;
+  animation: twinkle 2.6s ease-in-out infinite;
+  animation-delay: 0.6s;
 }
 
 @keyframes twinkle {
@@ -738,60 +243,531 @@ body {
   50%      { opacity: 1; }
 }
 
-/* ---------- Footer ---------- */
+.nebula {
+  position: absolute;
+  inset: 0;
+  opacity: calc(var(--night) * 0.55);
+  background:
+    radial-gradient(40% 30% at 20% 25%, rgba(90, 70, 160, 0.35), transparent 70%),
+    radial-gradient(35% 28% at 78% 60%, rgba(40, 80, 140, 0.3), transparent 70%),
+    radial-gradient(28% 22% at 55% 85%, rgba(140, 60, 120, 0.22), transparent 70%);
+}
+
+.galaxy {
+  position: absolute;
+  width: 420px;
+  height: 160px;
+  left: 66%;
+  top: 20%;
+  border-radius: 50%;
+  background: radial-gradient(ellipse, rgba(200, 220, 255, 0.35), rgba(160, 180, 230, 0.12) 40%, transparent 70%);
+  transform: rotate(-18deg);
+  opacity: calc(var(--night) * 0.5);
+}
+
+/* ============================================================
+   The world (planets + sun + orbits)
+   ============================================================ */
+
+.world {
+  position: fixed;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  will-change: transform;
+}
+
+.orbits {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.4s ease;
+}
+
+.orbits path {
+  fill: none;
+  stroke: var(--orbit-c);
+  stroke-opacity: 0.4;
+  stroke-width: 1;
+  vector-effect: non-scaling-stroke;
+}
+
+body.orbits-on .orbits { opacity: 1; }
+
+/* ---------- Sun: corona, granulated disc, eclipse anchor ---------- */
+
+.sun {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 150px;
+  height: 150px;
+  margin: -75px 0 0 -75px;
+  cursor: pointer;
+  pointer-events: auto;
+  border-radius: 50%;
+}
+
+.sun-body {
+  position: absolute;
+  inset: 0;
+  transform: translateY(var(--sun-sink));
+}
+
+.sun-corona {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 240%;
+  height: 240%;
+  margin: -120% 0 0 -120%;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255, 220, 120, 0.5), rgba(255, 170, 60, 0.16) 40%, transparent 70%);
+  opacity: calc(var(--sun-fade) * 0.85);
+  animation: coronaPulse 7s ease-in-out infinite;
+}
+
+.sun-disc {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: radial-gradient(circle at 50% 48%, var(--sun-a), var(--sun-b) 42%, var(--sun-c) 74%, var(--sun-d) 100%);
+  box-shadow: 0 0 40px 18px rgba(255, 214, 60, 0.55), 0 0 120px 60px rgba(255, 180, 50, 0.28);
+  opacity: var(--sun-fade);
+}
+
+/* Granulation: slow rolling cell texture on the photosphere. */
+.sun-disc::before {
+  content: "";
+  position: absolute;
+  inset: -6%;
+  border-radius: 50%;
+  background: repeating-radial-gradient(circle at 50% 50%,
+    rgba(255, 200, 90, 0.5) 0 7px,
+    rgba(255, 140, 30, 0.35) 7px 13px,
+    rgba(255, 245, 180, 0.5) 13px 19px);
+  mix-blend-mode: screen;
+  opacity: 0.5;
+  animation: boil 8s ease-in-out infinite;
+}
+
+@keyframes boil {
+  0%, 100% { transform: scale(1) rotate(0deg); opacity: 0.45; }
+  50%      { transform: scale(1.06) rotate(8deg); opacity: 0.7; }
+}
+
+@keyframes coronaPulse {
+  0%, 100% { transform: scale(1); }
+  50%      { transform: scale(1.06); }
+}
+
+/* At night the sun goes dark but keeps a faint eclipse disc so the
+   day/night toggle stays clickable. */
+.sun-eclipse {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  border-radius: 50%;
+  background: radial-gradient(circle at 50% 50%, #0a0f1e 0%, #05070f 60%, #0b1226 100%);
+  box-shadow: inset 0 0 26px rgba(160, 190, 255, 0.18), 0 0 34px 8px rgba(120, 150, 255, 0.1);
+  opacity: var(--eclipse);
+}
+
+/* ---------- Planets ---------- */
+
+.planet {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  border-radius: 50%;
+  pointer-events: auto;
+  cursor: pointer;
+  filter: brightness(var(--pl, 1));
+  box-shadow: 0 0 12px var(--atmo, rgba(255, 255, 255, 0.25));
+  will-change: transform;
+}
+
+/* Spherical lighting: a shading overlay rotated toward the sun.
+   Light comes from the sun-facing side; the dark side holds a soft
+   terminator instead of going pure black. */
+.planet::before {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  border-radius: 50%;
+  transform: rotate(var(--face, 0deg));
+  background:
+    radial-gradient(circle at 66% 44%, rgba(255, 255, 255, 0.42) 0%, rgba(255, 255, 255, 0) 24%),
+    linear-gradient(90deg,
+      rgba(0, 0, 0, 0.82) 0%,
+      rgba(0, 0, 0, 0.55) 26%,
+      rgba(0, 0, 0, 0) 52%,
+      rgba(255, 255, 255, 0.14) 74%,
+      rgba(255, 255, 255, 0.28) 100%);
+  pointer-events: none;
+}
+
+/* Thin atmosphere / rim glow around each world. */
+.planet::after {
+  content: "";
+  position: absolute;
+  inset: -3px;
+  border-radius: 50%;
+  background: radial-gradient(circle, transparent 58%, var(--atmo, rgba(255, 255, 255, 0.25)) 74%, transparent 88%);
+  filter: blur(1px);
+  pointer-events: none;
+}
+
+.planet.selected {
+  outline: 2px solid rgba(255, 255, 255, 0.75);
+  outline-offset: 4px;
+  filter: brightness(var(--pl, 1)) drop-shadow(0 0 10px var(--atmo, rgba(255, 255, 255, 0.35)));
+}
+
+/* Per-planet surface textures (clipped by border-radius). */
+
+.p-mercury {
+  --atmo: rgba(200, 200, 210, 0.3);
+  width: 16px;
+  height: 16px;
+  margin: -8px 0 0 -8px;
+  background:
+    radial-gradient(circle at 58% 44%, rgba(255, 255, 255, 0.14) 0 6%, transparent 7%),
+    radial-gradient(circle at 32% 62%, rgba(0, 0, 0, 0.18) 0 5%, transparent 6%),
+    radial-gradient(circle at 45% 40%, #dfdfdf, #9d9d9d 55%, #707070);
+}
+
+.p-venus {
+  --atmo: rgba(255, 235, 190, 0.35);
+  width: 24px;
+  height: 24px;
+  margin: -12px 0 0 -12px;
+  background:
+    repeating-linear-gradient(35deg, rgba(255, 255, 255, 0.18) 0 3px, transparent 3px 8px),
+    radial-gradient(circle at 38% 40%, #f8eec4, #e2c982 50%, #c9a155);
+}
+
+.p-earth {
+  --atmo: rgba(120, 190, 255, 0.55);
+  width: 28px;
+  height: 28px;
+  margin: -14px 0 0 -14px;
+  background:
+    repeating-radial-gradient(circle at 28% 26%, rgba(255, 255, 255, 0.85) 0 2px, rgba(255, 255, 255, 0.12) 2px 8px),
+    radial-gradient(circle at 62% 56%, #3f9e4f 0 15%, transparent 17%),
+    radial-gradient(circle at 28% 30%, #6aa84f 0 11%, transparent 13%),
+    radial-gradient(circle at 74% 34%, #c2b280 0 8%, transparent 10%),
+    radial-gradient(circle at 42% 76%, #3f9e4f 0 12%, transparent 14%),
+    radial-gradient(circle at 50% 50%, #2f7fd6, #1b5ba8 70%, #123d75);
+  background-position: var(--cloud-x, 0px) 50%, 0 0, 0 0, 0 0, 0 0, 0 0;
+  background-repeat: repeat, no-repeat, no-repeat, no-repeat, no-repeat, no-repeat;
+}
+
+.p-mars {
+  --atmo: rgba(255, 150, 110, 0.35);
+  width: 22px;
+  height: 22px;
+  margin: -11px 0 0 -11px;
+  background:
+    radial-gradient(circle at 62% 58%, rgba(120, 30, 10, 0.4) 0 8%, transparent 10%),
+    radial-gradient(circle at 30% 26%, rgba(255, 255, 255, 0.35) 0 5%, transparent 6%),
+    radial-gradient(circle at 38% 36%, #e97a52, #c1442a 55%, #8f2c16);
+}
+
+.p-jupiter {
+  --atmo: rgba(255, 214, 160, 0.4);
+  width: 52px;
+  height: 52px;
+  margin: -26px 0 0 -26px;
+  background:
+    radial-gradient(circle at 68% 62%, #c9693f 0 9%, transparent 10%),
+    radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.22), transparent 62%),
+    repeating-linear-gradient(to bottom,
+      #e9cca6 0 10%,
+      #d8b077 10% 16%,
+      #f1debe 16% 26%,
+      #c8935c 26% 32%,
+      #e3c295 32% 40%,
+      #d3a76c 40% 46%,
+      #f0dcbb 46% 58%);
+}
+
+.p-saturn {
+  --atmo: rgba(255, 228, 180, 0.45);
+  width: 46px;
+  height: 46px;
+  margin: -23px 0 0 -23px;
+  background:
+    radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.2), transparent 60%),
+    repeating-linear-gradient(to bottom,
+      #f3e4c2 0 10%,
+      #e2c689 10% 18%,
+      #f8efd4 18% 28%,
+      #d6b97c 28% 34%,
+      #ecd9ac 34% 44%);
+}
+
+.p-uranus {
+  --atmo: rgba(170, 255, 250, 0.4);
+  width: 30px;
+  height: 30px;
+  margin: -15px 0 0 -15px;
+  background:
+    repeating-linear-gradient(8deg, rgba(255, 255, 255, 0.12) 0 3px, transparent 3px 9px),
+    radial-gradient(circle at 40% 38%, #c9f5f2, #7fd4d0 60%, #4aa8a8);
+}
+
+.p-neptune {
+  --atmo: rgba(130, 165, 255, 0.45);
+  width: 29px;
+  height: 29px;
+  margin: -14.5px 0 0 -14.5px;
+  background:
+    radial-gradient(circle at 68% 40%, rgba(240, 246, 255, 0.6) 0 6%, transparent 7%),
+    radial-gradient(circle at 60% 60%, rgba(10, 20, 60, 0.5) 0 8%, transparent 9%),
+    radial-gradient(circle at 38% 36%, #7fa8f2, #3d5fd1 65%, #263a8f);
+}
+
+/* ---------- Saturn's rings (front/back halves for correct depth) ---------- */
+
+.saturn-ring {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 124px;
+  height: 124px;
+  margin: -62px 0 0 -62px;
+  border-radius: 50%;
+  pointer-events: none;
+  background: radial-gradient(circle at 50% 50%,
+    rgba(214, 190, 150, 0) 0 38px,
+    rgba(226, 205, 160, 0.35) 38px 45px,
+    rgba(214, 190, 150, 0) 45px 49px,
+    rgba(240, 222, 180, 0.65) 49px 60px,
+    rgba(214, 190, 150, 0) 60px 63px,
+    rgba(230, 210, 165, 0.4) 63px 70px,
+    rgba(214, 190, 150, 0) 70px 73px,
+    rgba(202, 180, 132, 0.55) 73px 79px,
+    rgba(214, 190, 150, 0) 79px 81px,
+    rgba(226, 205, 160, 0.2) 81px 85px,
+    rgba(214, 190, 150, 0) 85px 100%);
+  opacity: 0.9;
+}
+
+.ring-back {
+  clip-path: inset(0 0 50% 0);
+}
+
+.ring-front {
+  clip-path: inset(50% 0 0 0);
+}
+
+/* ---------- Planet labels (optional) ---------- */
+
+.plabel {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  z-index: 25;
+  pointer-events: none;
+  font-size: 0.6rem;
+  font-weight: 500;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--ui-text);
+  text-shadow: 0 1px 6px rgba(0, 0, 0, 0.3);
+  opacity: 0;
+  transition: opacity 0.4s ease;
+  white-space: nowrap;
+}
+
+body.labels-on .plabel { opacity: 0.85; }
+
+/* ============================================================
+   Header / controls / footer / tooltip
+   ============================================================ */
+
+.header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 30;
+  text-align: center;
+  padding: 22px 16px 0;
+  pointer-events: none;
+}
+
+.title {
+  font-size: clamp(1.4rem, 3.4vw, 2.3rem);
+  font-weight: 200;
+  letter-spacing: 0.42em;
+  text-indent: 0.42em;
+  text-transform: uppercase;
+  color: var(--title-color);
+  text-shadow: 0 0 22px var(--title-glow);
+}
+
+.subtitle {
+  margin-top: 10px;
+  font-size: clamp(0.6rem, 1.4vw, 0.78rem);
+  font-weight: 300;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: var(--title-color);
+  opacity: 0.72;
+}
+
+.controls {
+  position: fixed;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 30;
+  margin-top: clamp(76px, 16vh, 132px);
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 6px;
+  padding: 7px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.18);
+}
+
+.ctl {
+  font: inherit;
+  font-size: 0.66rem;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--ui-text);
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  padding: 9px 14px;
+  cursor: pointer;
+  transition: background 0.25s ease, color 0.25s ease, box-shadow 0.25s ease;
+}
+
+.ctl:hover {
+  background: rgba(255, 255, 255, 0.25);
+}
+
+.ctl.active {
+  background: rgba(255, 255, 255, 0.85);
+  color: #0b2a5e;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.18);
+}
 
 .footer {
   position: fixed;
-  bottom: 16px;
+  bottom: 14px;
   left: 50%;
   transform: translateX(-50%);
-  font-size: 1.3rem;
-  font-weight: 700;
-  letter-spacing: 0.06em;
-  padding: 14px 30px;
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.18);
-  border: 2px solid rgba(255, 255, 255, 0.45);
+  z-index: 30;
+  font-size: 0.6rem;
+  font-weight: 400;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--ui-text);
+  opacity: 0.7;
+  white-space: nowrap;
+  text-align: center;
+}
+
+.tooltip {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 40;
+  width: max-content;
+  max-width: 220px;
+  padding: 10px 14px;
+  border-radius: 12px;
+  background: rgba(12, 18, 38, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  color: #eaf0ff;
+  font-size: 0.7rem;
+  letter-spacing: 0.04em;
+  line-height: 1.55;
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
-  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.25);
-  background-image: linear-gradient(120deg, #fff, #ffe066, #ff8fab, #a18cd1, #fff);
-  background-size: 250% 250%;
-  background-clip: text;
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  animation: footerShimmer 4s ease-in-out infinite;
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-  white-space: nowrap;
-  z-index: 10;
+  box-shadow: 0 8px 26px rgba(0, 0, 0, 0.35);
+  opacity: 0;
+  transform: translate3d(-9999px, -9999px, 0);
+  transition: opacity 0.18s ease;
+  pointer-events: none;
 }
 
-.footer:hover {
-  transform: translateX(-50%) scale(1.06);
-  box-shadow: 0 6px 26px rgba(255, 255, 255, 0.45);
+.tooltip.show { opacity: 1; }
+
+.tooltip-name {
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  margin-bottom: 3px;
+  color: #ffd98f;
 }
 
-@keyframes footerShimmer {
-  0%   { background-position: 0% 50%; }
-  50%  { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
+/* ============================================================
+   Responsive
+   ============================================================ */
+
+@media (max-width: 640px) {
+  .sun {
+    width: 100px;
+    height: 100px;
+    margin: -50px 0 0 -50px;
+  }
+
+  .controls {
+    margin-top: clamp(64px, 14vh, 96px);
+    max-width: calc(100vw - 24px);
+    border-radius: 22px;
+  }
+
+  .ctl {
+    padding: 8px 11px;
+    font-size: 0.6rem;
+  }
+
+  .subtitle { display: none; }
+
+  .plabel { font-size: 0.52rem; }
+
+  .galaxy { width: 260px; height: 100px; }
+
+  .footer { max-width: calc(100vw - 20px); font-size: 0.52rem; }
 }
 
-/* ---------- Reduced motion ---------- */
+/* ============================================================
+   Reduced motion: freeze decorative animation, snap instantly
+   ============================================================ */
 
 @media (prefers-reduced-motion: reduce) {
-  .sun-disc,
-  .moon,
   .cloud,
-  .bird,
-  .owl,
-  .bat,
-  .plane,
-  .rocket,
-  .starfield::before,
-  .starfield::after,
-  .title,
-  .footer {
+  .silhouette,
+  .stars .pts,
+  .sun-corona,
+  .sun-disc::before,
+  .nebula,
+  .galaxy {
     animation: none;
   }
+
+  .cloud,
+  .silhouette { opacity: 0; }
+
+  .world { transform: none !important; }
+
+  .plabel,
+  .orbits,
+  .tooltip { transition: none; }
 }

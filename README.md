@@ -1,20 +1,22 @@
-# Solar Gravity 🌌
+# Solar Gravity
 
-A calm, cinematic solar system built with **HTML + CSS + a little JavaScript**.
+A calm, cinematic 3D miniature solar system built with **HTML + CSS + a little JavaScript** — no libraries, no images, no canvas.
 
-- 🪐 Eight gradient planets (Mercury → Neptune) drifting on individual elliptical orbits
-  - Each planet has its own radius, speed, direction, tilt, depth, and size
-  - Mercury orbits fastest; Neptune drifts slowest
-- ☀️ **Click the sun** to switch between day and night:
-  - **Day:** planets join the sun and revolve around it, full blue sky with drifting clouds and birds
-  - **Night:** planets keep revolving through sunset and twilight, then — only once night has fully fallen — they phase out of their orbit and bounce around the screen as deep space takes over with twinkling stars, and the sun becomes a full moon
-  - Every change is a smooth, reversible cinematic sweep — never a snap
-- 🖱️ **Parallax:** planets drift slightly with your cursor; closer planets move more
-- 🦉 Night brings an owl and bats; birds head home at dusk
-- ✈️ 3D aeroplanes cruise the day sky — shaded fuselage, swept wings, blinking anti-collision beacon on the wingtip; at night, 3D rockets launch vertically with glowing exhaust trails
-- 🕊️ 3D soaring birds with flapping wings share the day sky
-- ✨ Wiggling title and glowing planets
-- 👥 Footer credits: sworddao, demonx-sage, UjjenTamrakar & yashaswikarmacharya10-rgb
+- ☀️ A realistic sun: granulated photosphere, warm corona and glow — **click it** (or use the *Night* button) to switch between day and night
+- 🪐 Eight textured 3D planets (Mercury → Neptune) with sun-facing lighting:
+  - Shaded spheres with a soft terminator, specular highlight and a thin atmosphere rim — the light always comes from the sun's direction
+  - Earth shows oceans, continents, drifting cloud streaks and a blue atmosphere; Saturn gets proper multi-band rings that pass both behind and in front of its disc
+  - Each planet has its own orbit radius, speed, direction, inclination and spin
+- 🕐 **Day/night cycle:** one continuous sweep drives everything — blue day, warm sunset, deep-blue twilight, then a black night with twinkling stars, a nebula and a distant galaxy
+  - The sun warms, sinks toward the horizon and fades; at night it becomes a faint eclipse disc so the toggle stays clickable
+  - Planets keep revolving through sunset and twilight, and only **once night has fully fallen** do they gently phase out and bounce around the sky, then glide back to their orbits at dawn — always from wherever they happen to be, never a snap
+- 🎥 **Camera:** a damped, subtle 3D camera follows your cursor (and can auto-rotate); orbits, ring depth and planet sizes respond to the view
+- 🖱️ **Parallax:** the whole scene, the starfield and the planets drift subtly with your cursor
+- 🏷️ **Controls:** glass toolbar — Night/Day, Camera, Orbits, Labels, Rotate
+- 💬 **Interactivity:** hover a planet for its name, distance, diameter and orbital period; click to highlight it
+- 🌒 Decorative touches: drifting clouds by day, faint bird/plane silhouettes, and a quiet rocket launch in the night sky — all subtle, never competing with the solar system
+- ♿ **Accessibility:** honors `prefers-reduced-motion` (instant snap, camera and decorative motion disabled)
+- 📱 **Responsive:** scales down for small screens with fewer stars and smaller effects
 
 ## Try it
 
@@ -24,15 +26,16 @@ Open `index.html` in your browser, or visit the live page.
 
 Everything is in three files:
 
-| File        | What's inside                                   |
-|-------------|-------------------------------------------------|
-| `index.html`| Page structure + the eight planets              |
-| `style.css` | Sky layers, themes, and all the styling         |
-| `script.js` | Day/night transition + the planet orbit engine  |
+| File        | What's inside                                      |
+|-------------|----------------------------------------------------|
+| `index.html`| Page structure: sky layers, starfield, sun, planets, controls |
+| `style.css` | Realistic planet/sun/ring/star styling, sky themes, glass UI |
+| `script.js` | Day/night phase engine, 3D camera, lighting, stars, controls |
 
-- Tune each planet's orbit in the `planetDefs` array in `script.js` (speed, size, depth, day/night anchors).
-- Tweak `DURATION` in `script.js` to change how fast the day/night sweep plays.
+- Tune each planet in the `PLANETS` array in `script.js` (orbit radius, speed, direction, inclination, spin, night bounce path).
+- Tweak `DURATION`, `NIGHT_THRESHOLD` and `SCATTER_DURATION` in `script.js` to change the pacing of the cycle.
+- Adjust `PERSP` for a stronger or gentler 3D perspective.
 
 ## About
 
-A pure HTML + CSS + JS sky scene — cinematic day/night cycle, drifting planets with depth and parallax.
+A pure HTML + CSS + JS sky scene — cinematic day/night cycle, lit 3D planets with depth and parallax.
