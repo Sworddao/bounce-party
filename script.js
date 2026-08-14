@@ -21,6 +21,148 @@ function clamp01(value) {
   return Math.min(1, Math.max(0, value));
 }
 
+function easeInOutSine(value) {
+  return -(Math.cos(Math.PI * value) - 1) / 2;
+}
+
+/* ---------- Planet data ----------
+   Every planet drifts on its own elliptical path.
+   - day ellipse: near the sun (planets "join the sun" by day)
+   - night drift: around a scattered anchor point across the scene
+   The current day/night progress blends between the two, so the
+   scatter/join always interpolates from wherever a planet currently is. */
+
+const planetDefs = [
+  {
+    selector: ".p-mercury", size: 1.00, depth: 0.55, dir: 1, speed: 0.30, phase: 0.0, selfRot: 0.05,
+    day: { rx: 0.060, ry: 0.035, tilt: 0.20 },
+    night: { ax: 0.16, ay: 0.24, rx: 0.025, ry: 0.012, tilt: 0.30 },
+  },
+  {
+    selector: ".p-venus", size: 1.05, depth: 0.65, dir: -1, speed: 0.24, phase: 1.7, selfRot: 0.03,
+    day: { rx: 0.090, ry: 0.050, tilt: -0.15 },
+    night: { ax: 0.82, ay: 0.22, rx: 0.030, ry: 0.014, tilt: -0.40 },
+  },
+  {
+    selector: ".p-earth", size: 1.15, depth: 0.80, dir: 1, speed: 0.19, phase: 3.1, selfRot: 0.04,
+    day: { rx: 0.120, ry: 0.060, tilt: 0.05 },
+    night: { ax: 0.18, ay: 0.78, rx: 0.035, ry: 0.015, tilt: 0.10 },
+  },
+  {
+    selector: ".p-mars", size: 1.00, depth: 0.70, dir: -1, speed: 0.16, phase: 4.5, selfRot: 0.03,
+    day: { rx: 0.150, ry: 0.070, tilt: -0.25 },
+    night: { ax: 0.84, ay: 0.76, rx: 0.030, ry: 0.016, tilt: 0.50 },
+  },
+  {
+    selector: ".p-jupiter", size: 1.00, depth: 0.45, dir: 1, speed: 0.11, phase: 0.9, selfRot: 0.02,
+    day: { rx: 0.180, ry: 0.080, tilt: 0.10 },
+    night: { ax: 0.25, ay: 0.50, rx: 0.040, ry: 0.020, tilt: -0.20 },
+  },
+  {
+    selector: ".p-saturn", size: 1.00, depth: 0.40, dir: -1, speed: 0.09, phase: 2.3, selfRot: 0.06,
+    day: { rx: 0.210, ry: 0.090, tilt: -0.10 },
+    night: { ax: 0.72, ay: 0.52, rx: 0.038, ry: 0.018, tilt: 0.35 },
+  },
+  {
+    selector: ".p-uranus", size: 0.95, depth: 0.35, dir: 1, speed: 0.07, phase: 5.2, selfRot: 0.02,
+    day: { rx: 0.240, ry: 0.100, tilt: 0.15 },
+    night: { ax: 0.50, ay: 0.12, rx: 0.030, ry: 0.014, tilt: -0.50 },
+  },
+  {
+    selector: ".p-neptune", size: 0.90, depth: 0.30, dir: -1, speed: 0.05, phase: 6.0, selfRot: 0.02,
+    day: { rx: 0.270, ry: 0.110, tilt: -0.05 },
+    night: { ax: 0.52, ay: 0.88, rx: 0.035, ry: 0.015, tilt: 0.20 },
+  },
+];
+
+const planetInstances = planetDefs.map((def) => ({
+  ...def,
+  el: document.querySelector(def.selector),
+  angle: def.phase,
+  selfAngle: 0,
+}));
+
+const isMobile = window.innerWidth < 600;
+const MOBILE_SCALE = isMobile ? 0.7 : 1;
+const MAX_PARALLAX = 22; // px, for the deepest planet
+
+let sunSinkPx = 0;
+let parallaxX = 0;
+let parallaxY = 0;
+let parallaxTargetX = 0;
+let parallaxTargetY = 0;
+let planetLastTime = null;
+let planetRafId = null;
+
+function setupParallax() {
+  window.addEventListener("pointermove", function (event) {
+    parallaxTargetX = (event.clientX / window.innerWidth - 0.5) * 2;
+    parallaxTargetY = (event.clientY / window.innerHeight - 0.5) * 2;
+  }, { passive: true });
+}
+
+/* Compute one point on an ellipse, rotated by `tilt`. */
+function ellipsePoint(rx, ry, tilt, angle) {
+  const c = Math.cos(tilt);
+  const s = Math.sin(tilt);
+  const ex = rx * Math.cos(angle);
+  const ey = ry * Math.sin(angle);
+  return {
+    x: ex * c - ey * s,
+    y: ex * s + ey * c,
+  };
+}
+
+function renderPlanets() {
+  const vw = window.innerWidth;
+  const vh = window.innerHeight;
+  const base = Math.min(vw, vh) * MOBILE_SCALE;
+  const centerX = vw / 2;
+  const centerY = vh / 2 + sunSinkPx * 0.35;
+
+  // The existing day/night progress (0..1) becomes the scatter amount.
+  const scatter = easeInOutSine(progress);
+
+  parallaxX += (parallaxTargetX - parallaxX) * 0.06;
+  parallaxY += (parallaxTargetY - parallaxY) * 0.06;
+
+  for (const planet of planetInstances) {
+    const dayPoint = ellipsePoint(planet.day.rx * base, planet.day.ry * base, planet.day.tilt, planet.angle);
+    const nightPoint = ellipsePoint(planet.night.rx * base, planet.night.ry * base, planet.night.tilt, planet.angle);
+
+    // Day: orbit around the sun. Night: drift around the scattered anchor.
+    const x = lerp(centerX + dayPoint.x, planet.night.ax * vw + nightPoint.x, scatter);
+    const y = lerp(centerY + dayPoint.y, planet.night.ay * vh + nightPoint.y, scatter);
+
+    // Depth parallax: closer planets shift more with the cursor.
+    const px = x + parallaxX * planet.depth * MAX_PARALLAX;
+    const py = y + parallaxY * planet.depth * MAX_PARALLAX;
+
+    // Slight fade as planets scatter out; brighter when joined near the sun.
+    const opacity = (0.55 + 0.45 * planet.depth) * (1 - 0.25 * scatter);
+
+    planet.el.style.transform =
+      "translate3d(" + (px - centerX) + "px, " + (py - centerY) + "px, 0) " +
+      "rotate(" + planet.selfAngle + "rad) scale(" + planet.size + ")";
+    planet.el.style.opacity = opacity.toFixed(3);
+    planet.el.style.zIndex = 3 + Math.round(planet.depth * 4);
+  }
+}
+
+function planetTick(time) {
+  if (planetLastTime === null) planetLastTime = time;
+  const dt = Math.min(100, time - planetLastTime);
+  planetLastTime = time;
+
+  for (const planet of planetInstances) {
+    planet.angle += planet.speed * planet.dir * (dt / 1000);
+    planet.selfAngle += planet.selfRot * (dt / 1000);
+  }
+
+  renderPlanets();
+  planetRafId = requestAnimationFrame(planetTick);
+}
+
 function smoothstep(edge0, edge1, value) {
   const t = clamp01((value - edge0) / (edge1 - edge0));
   return t * t * (3 - 2 * t);
@@ -73,7 +215,8 @@ function applyPhase(value) {
   // Sun: stays up, warms at sunset, sinks toward the horizon, fades out.
   const sunSink = smoothstep(0.35, 0.9, value);
   const sunFade = 1 - smoothstep(0.5, 0.92, value);
-  setVar("--sun-sink", (sunSink * 140) + "px");
+  sunSinkPx = sunSink * 140;
+  setVar("--sun-sink", sunSinkPx + "px");
   setVar("--sun-fade", sunFade);
   setVar("--sun-bg", gradient(
     mixColor("#fff8c0", "#ffb36b", sunset),
@@ -138,20 +281,12 @@ function tick(time) {
   if ((direction === 1 && progress >= target) || (direction === -1 && progress <= target)) {
     progress = target;
     applyPhase(progress);
-    toggleNightClass(progress);
     rafId = null;
     return;
   }
 
   applyPhase(progress);
-  toggleNightClass(progress);
   rafId = requestAnimationFrame(tick);
-}
-
-/* Planets bounce off the screen edges only once we are deep into the night,
-   so the handover never looks like a snap mid-transition. */
-function toggleNightClass(value) {
-  document.body.classList.toggle("night", value >= 0.85);
 }
 
 function animateTo(nextTarget) {
@@ -162,7 +297,7 @@ function animateTo(nextTarget) {
   if (reducedMotion) {
     progress = target;
     applyPhase(progress);
-    toggleNightClass(progress);
+    renderPlanets();
     return;
   }
 
@@ -178,4 +313,8 @@ toggle.addEventListener("change", function () {
 /* ---------- Start ---------- */
 
 applyPhase(0);
-toggleNightClass(0);
+setupParallax();
+renderPlanets();
+if (!reducedMotion) {
+  planetRafId = requestAnimationFrame(planetTick);
+}

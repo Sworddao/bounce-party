@@ -135,58 +135,41 @@ body {
   left: 50%;
   border-radius: 50%;
   z-index: 5;
-  animation: orbit var(--speed) linear infinite;
   filter: brightness(var(--planet-dim));
-}
-
-@keyframes orbit {
-  from { transform: rotate(0deg) translateX(var(--r)) rotate(0deg); }
-  to   { transform: rotate(360deg) translateX(var(--r)) rotate(-360deg); }
+  will-change: transform, opacity;
 }
 
 .p-mercury {
-  --r: 100px;
-  --speed: 4s;
   width: 16px;
   height: 16px;
   margin: -8px 0 0 -8px;
   background: radial-gradient(circle at 35% 35%, #dcdcdc, #8c8c8c);
 }
 .p-venus {
-  --r: 135px;
-  --speed: 6s;
   width: 24px;
   height: 24px;
   margin: -12px 0 0 -12px;
   background: radial-gradient(circle at 35% 35%, #f7e6b4, #c89b4a);
 }
 .p-earth {
-  --r: 175px;
-  --speed: 8s;
   width: 28px;
   height: 28px;
   margin: -14px 0 0 -14px;
   background: radial-gradient(circle at 35% 35%, #7cd47c, #2f7fd6 65%, #1b5ba8);
 }
 .p-mars {
-  --r: 215px;
-  --speed: 10s;
   width: 22px;
   height: 22px;
   margin: -11px 0 0 -11px;
   background: radial-gradient(circle at 35% 35%, #f09a76, #c1442a);
 }
 .p-jupiter {
-  --r: 265px;
-  --speed: 13s;
   width: 50px;
   height: 50px;
   margin: -25px 0 0 -25px;
   background: radial-gradient(circle at 50% 50%, #f2d4a8, #e3b98c 40%, #b97a4a);
 }
 .p-saturn {
-  --r: 310px;
-  --speed: 16s;
   width: 44px;
   height: 44px;
   margin: -22px 0 0 -22px;
@@ -205,16 +188,12 @@ body {
   transform: rotate(-18deg);
 }
 .p-uranus {
-  --r: 350px;
-  --speed: 19s;
   width: 30px;
   height: 30px;
   margin: -15px 0 0 -15px;
   background: radial-gradient(circle at 35% 35%, #b8f2f2, #57c2c2);
 }
 .p-neptune {
-  --r: 395px;
-  --speed: 22s;
   width: 28px;
   height: 28px;
   margin: -14px 0 0 -14px;
@@ -228,53 +207,6 @@ body {
   border-radius: 50%;
   box-shadow: 0 0 8px rgba(255, 255, 255, 0.6);
 }
-
-/* ---------- Night: planets scatter & bounce off the screen edges ---------- */
-
-body.night .planet {
-  animation: var(--bounce) var(--bspeed) linear infinite;
-}
-
-@keyframes nightA {
-  0%   { transform: translate(-38vw, -28vh); }
-  25%  { transform: translate(42vw, -22vh); }
-  50%  { transform: translate(30vw, 40vh); }
-  75%  { transform: translate(-42vw, 28vh); }
-  100% { transform: translate(-38vw, -28vh); }
-}
-
-@keyframes nightB {
-  0%   { transform: translate(-18vw, 38vh); }
-  25%  { transform: translate(40vw, 20vh); }
-  50%  { transform: translate(14vw, -42vh); }
-  75%  { transform: translate(-40vw, -14vh); }
-  100% { transform: translate(-18vw, 38vh); }
-}
-
-@keyframes nightC {
-  0%   { transform: translate(38vw, -34vh); }
-  25%  { transform: translate(-38vw, -34vh); }
-  50%  { transform: translate(-30vw, 40vh); }
-  75%  { transform: translate(36vw, 38vh); }
-  100% { transform: translate(38vw, -34vh); }
-}
-
-@keyframes nightD {
-  0%   { transform: translate(-24vw, -8vh); }
-  25%  { transform: translate(26vw, 42vh); }
-  50%  { transform: translate(42vw, -32vh); }
-  75%  { transform: translate(-42vw, 18vh); }
-  100% { transform: translate(-24vw, -8vh); }
-}
-
-body.night .p-mercury { --bounce: nightA; --bspeed: 8s; }
-body.night .p-venus   { --bounce: nightB; --bspeed: 11s; }
-body.night .p-earth    { --bounce: nightC; --bspeed: 13s; }
-body.night .p-mars     { --bounce: nightD; --bspeed: 9s; }
-body.night .p-jupiter  { --bounce: nightA; --bspeed: 16s; animation-delay: -4s; }
-body.night .p-saturn   { --bounce: nightB; --bspeed: 15s; animation-delay: -7s; }
-body.night .p-uranus   { --bounce: nightC; --bspeed: 18s; animation-delay: -10s; }
-body.night .p-neptune  { --bounce: nightD; --bspeed: 20s; animation-delay: -13s; }
 
 /* ---------- Headings ---------- */
 
