@@ -94,6 +94,14 @@ const isMobile = window.innerWidth < 600;
 const MOBILE_SCALE = isMobile ? 0.7 : 1;
 const MAX_PARALLAX = 22; // px, for the deepest planet
 
+// Planets stay orbiting the sun until night is fully established, then
+// slowly phase out onto their bounce paths (~3s after the sky goes dark).
+const NIGHT_THRESHOLD = 0.9;   // progress at which "night has fully hit"
+const SCATTER_DURATION = 3000; // ms for the orbit -> bounce phase-out
+
+let scatterProgress = 0; // 0 = orbiting the sun, 1 = fully bouncing
+let scatterTarget = 0;
+
 let sunSinkPx = 0;
 let parallaxX = 0;
 let parallaxY = 0;
@@ -144,7 +152,8 @@ function renderPlanets() {
 
   // Day/night progress smoothly carries each planet from its sun orbit
   // out onto its bouncing path (and back), always from its current spot.
-  const scatter = easeInOutSine(progress);
+  // scatterProgress only starts once night is fully established.
+  const scatter = easeInOutSine(scatterProgress);
 
   parallaxX += (parallaxTargetX - parallaxX) * 0.06;
   parallaxY += (parallaxTargetY - parallaxY) * 0.06;
@@ -175,6 +184,15 @@ function planetTick(time) {
   if (planetLastTime === null) planetLastTime = time;
   const dt = Math.min(100, time - planetLastTime);
   planetLastTime = time;
+
+  // Planets only phase out after night fully hits (and wait until the sky
+  // is truly day before returning to orbit).
+  scatterTarget = progress >= NIGHT_THRESHOLD ? 1 : 0;
+  if (scatterProgress < scatterTarget) {
+    scatterProgress = Math.min(scatterTarget, scatterProgress + dt / SCATTER_DURATION);
+  } else if (scatterProgress > scatterTarget) {
+    scatterProgress = Math.max(scatterTarget, scatterProgress - dt / SCATTER_DURATION);
+  }
 
   for (const planet of planetInstances) {
     planet.angle += planet.speed * planet.dir * (dt / 1000);
@@ -319,6 +337,7 @@ function animateTo(nextTarget) {
 
   if (reducedMotion) {
     progress = target;
+    scatterProgress = target >= NIGHT_THRESHOLD ? 1 : 0;
     applyPhase(progress);
     renderPlanets();
     return;
