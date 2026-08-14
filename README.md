@@ -1,6 +1,6 @@
 # Bounce Party 🎉
 
-A fun, chaotic playground built with **pure HTML + CSS** (no JavaScript!).
+A fun, chaotic playground built with **HTML + CSS + a little JavaScript**.
 
 🚀 Space theme edition — this party hits different, no cap 🔥
 
@@ -20,12 +20,13 @@ Open `index.html` in your browser to try it.
 
 ## Edit it
 
-Everything is in two files:
+Everything is in three files:
 
 | File        | What's inside                       |
 |-------------|-------------------------------------|
 | `index.html`| Page structure + the emojis         |
 | `style.css` | All the fun animations & themes     |
+| `script.js` | Smooth, cinematic day/night transition |
 
 Change the emojis in `index.html` or tweak `animation-duration` in `style.css` to make the balls bounce faster or slower.
 
