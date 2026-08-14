@@ -6,8 +6,8 @@ A calm, cinematic solar system built with **HTML + CSS + a little JavaScript**.
   - Each planet has its own radius, speed, direction, tilt, depth, and size
   - Mercury orbits fastest; Neptune drifts slowest
 - ☀️ **Click the sun** to switch between day and night:
-  - **Day:** planets join the sun and orbit close to it, full blue sky with drifting clouds and birds
-  - **Night:** planets slowly fade out and scatter across the scene as deep space takes over with twinkling stars, and the sun becomes a full moon
+  - **Day:** planets join the sun and revolve around it, full blue sky with drifting clouds and birds
+  - **Night:** planets smoothly phase out of their orbit and bounce around the screen as deep space takes over with twinkling stars, and the sun becomes a full moon
   - The transition is a smooth, reversible 4-second cinematic sweep — never a snap
 - 🖱️ **Parallax:** planets drift slightly with your cursor; closer planets move more
 - 🦉 Night brings an owl and bats; birds head home at dusk
