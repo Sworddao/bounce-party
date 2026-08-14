@@ -1,35 +1,36 @@
-# Bounce Party 🎉
+# Solar Gravity 🌌
 
-A fun, chaotic playground built with **HTML + CSS + a little JavaScript**.
+A calm, cinematic solar system built with **HTML + CSS + a little JavaScript**.
 
-🚀 Space theme edition — this party hits different, no cap 🔥
-
-- 🪐 Eight emoji balls (🌍 🪐 ☄️ 🌙 ⭐ 👨‍🚀 🚀 🛰️) resting in the stage
-- **Party Mode** toggle — on by default: balls bounce forever; off: they gracefully fade and settle back down
+- 🪐 Eight gradient planets (Mercury → Neptune) drifting on individual elliptical orbits
+  - Each planet has its own radius, speed, direction, tilt, depth, and size
+  - Mercury orbits fastest; Neptune drifts slowest
 - ☀️ **Click the sun** to switch between day and night:
-  - **Day:** real blue sky with a glowing sun, drifting clouds, and birds flying across
-  - **Night:** the lights go out into deep space with twinkling stars, and the sun becomes a full moon
-- ✨ Aura badge (`aura +67 🔥`) and a wiggling title
-- 🎊 Confetti that falls while Party Mode is on (CSS-only checkbox toggle)
-- 🖱️ Balls glow and scale up when hovered, and squeeze a little bigger at the top of each bounce
+  - **Day:** planets join the sun and orbit close to it, full blue sky with drifting clouds and birds
+  - **Night:** planets slowly fade out and scatter across the scene as deep space takes over with twinkling stars, and the sun becomes a full moon
+  - The transition is a smooth, reversible 4-second cinematic sweep — never a snap
+- 🖱️ **Parallax:** planets drift slightly with your cursor; closer planets move more
+- 🦉 Night brings an owl and bats; birds head home at dusk
+- ✨ Wiggling title and glowing planets
 - 👥 Footer credits: sworddao, demonx-sage, UjjenTamrakar & yashaswikarmacharya10-rgb
 
 ## Try it
 
-Open `index.html` in your browser to try it.
+Open `index.html` in your browser, or visit the live page.
 
 ## Edit it
 
 Everything is in three files:
 
-| File        | What's inside                       |
-|-------------|-------------------------------------|
-| `index.html`| Page structure + the emojis         |
-| `style.css` | All the fun animations & themes     |
-| `script.js` | Smooth, cinematic day/night transition |
+| File        | What's inside                                   |
+|-------------|-------------------------------------------------|
+| `index.html`| Page structure + the eight planets              |
+| `style.css` | Sky layers, themes, and all the styling         |
+| `script.js` | Day/night transition + the planet orbit engine  |
 
-Change the emojis in `index.html` or tweak `animation-duration` in `style.css` to make the balls bounce faster or slower.
+- Tune each planet's orbit in the `planetDefs` array in `script.js` (speed, size, depth, day/night anchors).
+- Tweak `DURATION` in `script.js` to change how fast the day/night sweep plays.
 
 ## About
 
-A fun pure HTML + CSS playground - bouncing emojis, confetti, party mode toggle, day/night sky, space theme
+A pure HTML + CSS + JS sky scene — cinematic day/night cycle, drifting planets with depth and parallax.

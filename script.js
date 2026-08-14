@@ -1,4 +1,4 @@
-/* Solar Bounce Party — smooth day/night transition.
+/* Solar Gravity — smooth day/night transition.
    One continuous value drives everything:
    progress = 0  full day
    progress = 1  full night
