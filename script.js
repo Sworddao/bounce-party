@@ -137,6 +137,9 @@ let selectedIndex = -1;
 let rafId = null;
 let lastTime = null;
 
+let explorerMode = false;     // Space Explorer Mode: night sky, sun untouched
+let night = 0;                // eased 0..1 blend toward the explorer night
+
 let U = 0;                    // base unit = min(vw, vh) * scale
 let sunR = isMobile ? 50 : 75;
 
@@ -336,6 +339,12 @@ function applyEnv() {
   } else if (state === STATE.LIGHT_DELAY) {
     turb = 1;
     lf = clamp01(phaseT / LIGHT_DELAY_DUR);
+  }
+
+  // Space Explorer Mode darkens the sky on its own; the sun keeps shining
+  // and the planets keep their orbits, so only sky-level values blend.
+  if (night > 0) {
+    skyLevel = Math.max(skyLevel, night);
   }
 
   const boil = sunLive * (0.45 + 0.4 * turb);
@@ -638,6 +647,7 @@ const ctlCamera = document.getElementById("ctl-camera");
 const ctlOrbits = document.getElementById("ctl-orbits");
 const ctlLabels = document.getElementById("ctl-labels");
 const ctlRotate = document.getElementById("ctl-rotate");
+const ctlExplorer = document.getElementById("ctl-explorer");
 
 function updateSunUI() {
   if (state === STATE.ACTIVE) {
@@ -699,6 +709,17 @@ ctlRotate.addEventListener("click", function () {
   ctlRotate.setAttribute("aria-pressed", String(autoRotate));
 });
 
+ctlExplorer.addEventListener("click", function () {
+  explorerMode = !explorerMode;
+  ctlExplorer.classList.toggle("active", explorerMode);
+  ctlExplorer.setAttribute("aria-pressed", String(explorerMode));
+  if (reducedMotion) {
+    night = explorerMode ? 1 : 0;
+    applyEnv();
+    render(0, 0);
+  }
+});
+
 /* ---------- Animation loop ---------- */
 
 function frame(time) {
@@ -710,6 +731,7 @@ function frame(time) {
   step(dtSec);
 
   const damp = 1 - Math.exp(-dt / 450);
+  night += ((explorerMode ? 1 : 0) - night) * damp;
   if (camEnabled) {
     camYaw += (camYawTarget - camYaw) * damp;
     camPitch += (camPitchTarget - camPitch) * damp;

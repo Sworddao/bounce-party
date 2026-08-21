@@ -876,6 +876,7 @@ body.count-on .status-count { display: block; }
   left: 24px;
   z-index: 1000;
 
+  font: inherit;
   padding: 10px 16px;
   border-radius: 10px;
 
@@ -890,4 +891,31 @@ body.count-on .status-count { display: block; }
   box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
 
   backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+
+  cursor: pointer;
+  transition: background 0.35s ease, border-color 0.35s ease,
+    box-shadow 0.35s ease;
+}
+
+/* Hovering melts the chip into the sky behind it. */
+.explorer-badge:hover {
+  background: rgba(10, 15, 25, 0.18);
+  border-color: rgba(255, 255, 255, 0.05);
+  box-shadow: none;
+}
+
+.explorer-badge:focus-visible {
+  outline: 2px solid rgba(255, 217, 120, 0.9);
+  outline-offset: 3px;
+}
+
+.explorer-badge.active {
+  border-color: rgba(255, 217, 120, 0.55);
+  box-shadow: 0 0 18px rgba(255, 190, 90, 0.28), 0 6px 20px rgba(0, 0, 0, 0.3);
+}
+
+.explorer-badge.active:hover {
+  background: rgba(10, 15, 25, 0.18);
+  box-shadow: 0 0 18px rgba(255, 190, 90, 0.28);
 }
