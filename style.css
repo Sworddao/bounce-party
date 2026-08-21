@@ -869,3 +869,21 @@ body.count-on .status-count { display: block; }
   .tooltip,
   .light-front { transition: none; }
 }
+
+.explorer-badge {
+  display: inline-block;
+  margin-top: 10px;
+  padding: 6px 14px;
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.12);
+  color: white;
+  font-size: 0.85rem;
+  letter-spacing: 0.5px;
+  transition: transform 0.3s ease, background 0.3s ease;
+}
+
+.explorer-badge:hover {
+  transform: scale(1.05);
+  background: rgba(255, 255, 255, 0.22);
+}
